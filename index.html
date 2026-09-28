@@ -1,0 +1,2362 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Meu Controle - Finanças para Motoristas</title>
+  <meta name="description" content="Aplicativo de finanças pessoais e controle diário focado em motoristas de aplicativo.">
+  <meta property="og:title" content="Meu Controle - Finanças para Motoristas">
+  <meta property="og:description" content="Aplicativo de finanças pessoais e controle diário focado em motoristas de aplicativo.">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root {
+      --bg: #060A16;
+      --surface: #0F1830;
+      --surface2: #16213F;
+      --surface3: #1E2D54;
+      --ink: #E9EEFC;
+      --muted: #7C8AAE;
+      --line: #22304F;
+      --cyan: #34E7C0;
+      --cyan-soft: rgba(52, 231, 192, 0.14);
+      --violet: #8C7BFF;
+      --violet-soft: rgba(140, 123, 255, 0.16);
+      --coral: #FF5C7C;
+      --coral-soft: rgba(255, 92, 124, 0.14);
+      --amber: #FF9F43;
+      --amber-soft: rgba(255, 159, 67, 0.16);
+      --grad: linear-gradient(90deg, var(--cyan), var(--violet));
+      --grad-orange: linear-gradient(90deg, #FF793F, #FFB142);
+      --radius: 8px;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    html, body {
+      min-height: 100%;
+      background: radial-gradient(circle at 15% 0%, rgba(140,123,255,0.09), transparent 45%),
+                  radial-gradient(circle at 85% 15%, rgba(52,231,192,0.07), transparent 50%),
+                  var(--bg);
+      color: var(--ink);
+      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: -0.01em;
+    }
+    .wrap {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 16px 14px calc(96px + env(safe-area-inset-bottom, 0px));
+    }
+    /* Header Top Bar */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 16px;
+      letter-spacing: -0.02em;
+    }
+    .brand-badge {
+      background: var(--grad);
+      color: #060A16;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+    .status-pill {
+      font-size: 11px;
+      color: var(--cyan);
+      background: var(--cyan-soft);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 8px var(--cyan);
+    }
+    /* Hero Card */
+    header.hero {
+      position: relative;
+      padding: 20px;
+      border-radius: var(--radius);
+      margin-bottom: 16px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+    }
+    header.hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--grad);
+    }
+    .month-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .month-nav-btn {
+      background: var(--surface2);
+      border: 1px solid var(--line);
+      color: var(--ink);
+      font-size: 18px;
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .month-nav-btn:hover {
+      background: var(--surface3);
+      border-color: var(--violet);
+    }
+    .month-label {
+      font-weight: 600;
+      font-size: 14px;
+      text-transform: capitalize;
+      letter-spacing: 0.02em;
+    }
+    .saldo-label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .saldo-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 34px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin: 4px 0 16px;
+      background: var(--grad);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .saldo-value.neg {
+      background: none;
+      -webkit-text-fill-color: initial;
+      color: var(--coral);
+    }
+    .mini-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .mini {
+      flex: 1;
+      padding: 12px;
+      background: var(--surface2);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+    }
+    .mini .l {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .mini.in .l { color: var(--cyan); }
+    .mini.out .l { color: var(--coral); }
+    .mini .v {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 16px;
+      font-weight: 700;
+      margin-top: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    /* Stats Grid */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .kpi-card {
+      background: rgba(22, 33, 63, 0.6);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 8px 10px;
+    }
+    .kpi-card .l {
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .kpi-card .v {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-top: 2px;
+    }
+    /* Dívida Box */
+    .divida-box {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--line);
+    }
+    .divida-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 8px;
+    }
+    .divida-top .l {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    .divida-top .v {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--amber);
+    }
+    .divida-bar {
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+      background: var(--surface2);
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .divida-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--amber), var(--cyan));
+      width: 0%;
+      transition: width 0.5s ease;
+      border-radius: 4px;
+    }
+    /* Card Styles */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .card h2 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .badge-ai {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 12px;
+      background: var(--violet-soft);
+      color: var(--violet);
+      border: 1px solid rgba(140, 123, 255, 0.3);
+      font-weight: 600;
+    }
+    /* Form controls */
+    .seg {
+      display: flex;
+      background: var(--surface2);
+      border-radius: 6px;
+      padding: 3px;
+      margin-bottom: 14px;
+      gap: 4px;
+      border: 1px solid var(--line);
+    }
+    .seg button {
+      flex: 1;
+      border: none;
+      background: none;
+      padding: 10px 0;
+      border-radius: 4px;
+      font-family: inherit;
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .seg button.active.in {
+      background: var(--cyan-soft);
+      color: var(--cyan);
+      box-shadow: inset 0 0 0 1px var(--cyan);
+    }
+    .seg button.active.out {
+      background: var(--coral-soft);
+      color: var(--coral);
+      box-shadow: inset 0 0 0 1px var(--coral);
+    }
+    label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 600;
+      display: block;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    input, select, textarea {
+      width: 100%;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      padding: 12px 14px;
+      border-radius: 6px;
+      border: 1px solid var(--line);
+      background: var(--surface2);
+      color: var(--ink);
+      margin-bottom: 14px;
+      outline: none;
+      transition: all 0.2s;
+    }
+    input[type="text"], input[type="date"], select, textarea {
+      font-family: inherit;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--violet);
+      box-shadow: 0 0 0 3px var(--violet-soft);
+      background: var(--surface3);
+    }
+    .shortcut-btn {
+      width: 100%;
+      background: rgba(255, 159, 67, 0.1);
+      border: 1px solid rgba(255, 159, 67, 0.3);
+      padding: 12px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      text-align: center;
+      color: var(--amber);
+      margin-bottom: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .shortcut-btn:hover {
+      background: rgba(255, 159, 67, 0.2);
+    }
+    .btn-submit {
+      width: 100%;
+      background: var(--cyan);
+      color: #060A16;
+      border: none;
+      padding: 14px;
+      border-radius: var(--radius);
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-submit:active {
+      transform: scale(0.99);
+    }
+    .btn-submit.out {
+      background: var(--coral);
+      color: #FFFFFF;
+    }
+    .categorias-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+    .cat-btn {
+      background: var(--surface2);
+      border: 1px solid var(--line);
+      padding: 9px 4px;
+      border-radius: 6px;
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s;
+    }
+    .cat-btn.active {
+      border-color: var(--violet);
+      background: var(--violet-soft);
+      color: #FFFFFF;
+    }
+    /* List items */
+    .list-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 4px;
+      border-bottom: 1px solid var(--line);
+    }
+    .list-item:last-child {
+      border-bottom: none;
+    }
+    .item-info {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .item-title {
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .item-desc {
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      gap: 8px;
+    }
+    .item-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .item-val.in { color: var(--cyan); }
+    .item-val.out { color: var(--coral); }
+    .btn-del {
+      color: var(--muted);
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 4px;
+      border-radius: 4px;
+      transition: color 0.15s;
+      line-height: 1;
+    }
+    .btn-del:hover {
+      color: var(--coral);
+    }
+    .empty-state {
+      text-align: center;
+      padding: 24px 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    /* Toast feedback banner */
+    .toast-feedback {
+      background: var(--violet-soft);
+      border: 1px solid var(--violet);
+      color: var(--ink);
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      margin-bottom: 14px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      animation: fadeIn 0.25s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    /* Ranking Gastos List */
+    .ranking-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .ranking-item:last-child {
+      border-bottom: none;
+    }
+    .ranking-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .ranking-pos {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--surface2);
+      border: 1px solid var(--line);
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+    }
+    .ranking-pos.top1 {
+      background: var(--coral-soft);
+      color: var(--coral);
+      border-color: var(--coral);
+    }
+    .ranking-name {
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .ranking-right {
+      text-align: right;
+    }
+    .ranking-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--coral);
+    }
+    .ranking-pct {
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .chart-container-box {
+      position: relative;
+      width: 100%;
+      min-height: 220px;
+      margin: 8px 0;
+    }
+
+    /* Backup Grid */
+    .backup-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+      margin-bottom: 12px;
+    }
+    .btn-backup {
+      background: var(--surface2);
+      border: 1px solid var(--line);
+      color: var(--ink);
+      padding: 14px 10px;
+      border-radius: var(--radius);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      text-align: center;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .btn-backup:hover {
+      border-color: var(--cyan);
+      background: var(--surface3);
+    }
+    .btn-backup svg {
+      width: 22px;
+      height: 22px;
+      stroke-width: 2;
+      stroke: currentColor;
+      fill: none;
+    }
+    .btn-backup.primary {
+      border-color: rgba(52, 231, 192, 0.4);
+      color: var(--cyan);
+    }
+
+    /* --- ESTILOS EXCLUSIVOS DA ABA METAS --- */
+    .card-motivacao {
+      background: linear-gradient(135deg, rgba(140, 123, 255, 0.14), rgba(255, 159, 67, 0.12));
+      border: 1px solid rgba(140, 123, 255, 0.35);
+      position: relative;
+      overflow: hidden;
+    }
+    .card-motivacao::before {
+      content: '“';
+      position: absolute;
+      right: 12px;
+      bottom: -15px;
+      font-size: 72px;
+      color: rgba(255, 255, 255, 0.05);
+      font-family: serif;
+      pointer-events: none;
+    }
+    .motivacao-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .motivacao-tag {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--amber);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .btn-reload-frase {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      border-radius: 4px;
+      padding: 3px 8px;
+      font-size: 11px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s;
+    }
+    .btn-reload-frase:hover {
+      color: var(--ink);
+      border-color: var(--violet);
+    }
+    #txt-motivacao {
+      font-size: 14px;
+      line-height: 1.45;
+      font-weight: 500;
+      color: var(--ink);
+      font-style: italic;
+      min-height: 42px;
+      transition: opacity 0.2s ease;
+    }
+
+    /* Termômetro de Ritmo */
+    .ritmo-container {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin: 12px 0 16px;
+    }
+    .ritmo-badge {
+      background: var(--surface2);
+      border: 1px solid var(--line);
+      padding: 10px 6px;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.25s ease;
+    }
+    .ritmo-badge .icon {
+      font-size: 16px;
+    }
+    .ritmo-badge.active.abaixo {
+      border-color: var(--coral);
+      background: var(--coral-soft);
+      color: var(--coral);
+      box-shadow: 0 0 12px rgba(255, 92, 124, 0.2);
+    }
+    .ritmo-badge.active.ritmo {
+      border-color: var(--amber);
+      background: var(--amber-soft);
+      color: var(--amber);
+      box-shadow: 0 0 12px rgba(255, 159, 67, 0.25);
+    }
+    .ritmo-badge.active.voando {
+      border-color: var(--cyan);
+      background: var(--cyan-soft);
+      color: var(--cyan);
+      box-shadow: 0 0 12px rgba(52, 231, 192, 0.25);
+    }
+
+    /* Barra Laranja Meta Diária */
+    .meta-bar-wrap {
+      height: 14px;
+      border-radius: 7px;
+      background: var(--surface2);
+      border: 1px solid rgba(255,255,255,0.06);
+      overflow: hidden;
+      margin: 8px 0;
+      position: relative;
+    }
+    .meta-bar-fill {
+      height: 100%;
+      background: var(--grad-orange);
+      width: 0%;
+      transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      border-radius: 7px;
+      box-shadow: 0 0 10px rgba(255, 159, 67, 0.5);
+    }
+
+    /* Objetivos de Longo Prazo */
+    .objetivo-item {
+      background: var(--surface2);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .objetivo-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .objetivo-title {
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .objetivo-priority {
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 3px;
+      text-transform: uppercase;
+    }
+    .p-1 { background: rgba(255, 92, 124, 0.2); color: var(--coral); border: 1px solid var(--coral); }
+    .p-2 { background: rgba(52, 231, 192, 0.2); color: var(--cyan); border: 1px solid var(--cyan); }
+    .p-3 { background: rgba(140, 123, 255, 0.2); color: var(--violet); border: 1px solid var(--violet); }
+    .objetivo-desc {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+    .objetivo-status {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    /* Bottom Navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      background-color: rgba(15, 24, 48, 0.96);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-top: 1px solid var(--line);
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 2px calc(8px + env(safe-area-inset-bottom, 0px));
+      z-index: 100;
+    }
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: color 0.15s, transform 0.1s;
+      padding: 4px 4px;
+      border: none;
+      background: none;
+      flex: 1;
+    }
+    .nav-item:active {
+      transform: scale(0.95);
+    }
+    .nav-item svg {
+      width: 20px;
+      height: 20px;
+      stroke-width: 2;
+      stroke: currentColor;
+      fill: none;
+    }
+    .nav-item.active {
+      color: var(--cyan);
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+      animation: tabFade 0.2s ease;
+    }
+    @keyframes tabFade {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    /* Prompt hints */
+    .prompt-hints {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .hint-chip {
+      background: var(--surface2);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 11px;
+      padding: 5px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .hint-chip:hover {
+      color: var(--ink);
+      border-color: var(--violet);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <div class="brand">
+        <span>🚗</span> Meu Controle
+        <span class="brand-badge">Motorista</span>
+      </div>
+      <div class="status-pill">
+        <span class="status-dot"></span> Online
+      </div>
+    </div>
+
+    <!-- Feedback Banner após Agente -->
+    <div id="toast-banner" class="toast-feedback">
+      <span>✨</span>
+      <span id="toast-msg">Dados interpretados com sucesso! Revise e salve.</span>
+    </div>
+
+    <!-- ABA 1: RESUMO -->
+    <div id="tab-resumo" class="tab-content active">
+      <header class="hero">
+        <div class="month-row">
+          <button class="month-nav-btn" onclick="changeMonth(-1)" aria-label="Mês anterior">‹</button>
+          <div class="month-label" id="lbl-mes-ano">Setembro de 2026</div>
+          <button class="month-nav-btn" onclick="changeMonth(1)" aria-label="Próximo mês">›</button>
+        </div>
+
+        <div class="saldo-label">Sobra do mês (Lucro Líquido)</div>
+        <div class="saldo-value" id="val-sobra">R$ 0,00</div>
+
+        <div class="mini-row">
+          <div class="mini in">
+            <div class="l">▲ Faturou</div>
+            <div class="v" id="val-faturou">R$ 0,00</div>
+          </div>
+          <div class="mini out" style="cursor: pointer;" onclick="trocarAba('graficos')" title="Ver gráficos de gastos">
+            <div class="l">▼ Gastou ↗</div>
+            <div class="v" id="val-gastou">R$ 0,00</div>
+          </div>
+        </div>
+
+        <div class="kpi-row">
+          <div class="kpi-card">
+            <div class="l">⏱ Horas no Mês</div>
+            <div class="v" id="val-horas-total">0.0h</div>
+          </div>
+          <div class="kpi-card" style="cursor: pointer;" onclick="trocarAba('metas')" title="Ver Metas e Ritmo">
+            <div class="l">🎯 Meta Diária ↗</div>
+            <div class="v" id="val-status-meta-home" style="color: var(--amber);">Ver ritmo</div>
+          </div>
+        </div>
+
+        <div class="divida-box" style="cursor: pointer;" onclick="trocarAba('metas')" title="Ver meta de quitação Nubank">
+          <div class="divida-top">
+            <span class="l">Dívida restante (Nubank) ↗</span>
+            <span class="v" id="val-divida-restante">R$ 0,00</span>
+          </div>
+          <div class="divida-bar">
+            <div class="divida-fill" id="bar-divida"></div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Card do Agente Inteligente -->
+      <div class="card">
+        <div class="card-header">
+          <h2>💬 Conte pro Agente</h2>
+          <span class="badge-ai">IA Automática</span>
+        </div>
+        <textarea id="txt-agente" rows="2" placeholder="Ex: Hoje rodei 8h e fiz 350 reais no Uber, ou gastei 100 de gasolina"></textarea>
+        <button class="btn-submit" style="background: var(--violet); color: white;" onclick="processarAgente()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3z"/></svg>
+          Interpretar e Preencher
+        </button>
+
+        <div class="prompt-hints">
+          <span class="hint-chip" onclick="preencherExemplo('Faturei 280 reais e rodei 7h no app')">💡 Faturei 280 e rodei 7h</span>
+          <span class="hint-chip" onclick="preencherExemplo('Gastei 95 de gasolina no posto')">⛽ Gastei 95 de gasolina</span>
+          <span class="hint-chip" onclick="preencherExemplo('Aluguel semanal do carro 600')">🚗 Aluguel carro 600</span>
+        </div>
+      </div>
+
+      <!-- Resumo dos Últimos Lançamentos -->
+      <div class="card">
+        <div class="card-header">
+          <h2>Últimos Lançamentos</h2>
+          <span style="font-size: 12px; color: var(--muted); cursor: pointer;" onclick="trocarAba('historico')">Ver todos →</span>
+        </div>
+        <div id="lista-ultimos">
+          <!-- Renderizado via JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ABA 2: LANÇAMENTO -->
+    <div id="tab-lancamento" class="tab-content">
+      <div class="shortcut-btn" onclick="lancarAluguelRapido()">
+        ⚡ Aluguel do carro (R$ 600)
+      </div>
+
+      <div class="card">
+        <h2>Novo Lançamento</h2>
+        
+        <div class="seg">
+          <button id="btn-seg-in" class="active in" onclick="setTipo('in')">Entrada (+)</button>
+          <button id="btn-seg-out" onclick="setTipo('out')">Saída (-)</button>
+        </div>
+
+        <label for="form-valor">Valor (R$)</label>
+        <input type="number" id="form-valor" step="0.01" min="0" placeholder="0,00" required>
+
+        <label for="form-horas">Horas trabalhadas (opcional)</label>
+        <input type="number" id="form-horas" step="0.5" min="0" placeholder="Ex: 8">
+
+        <label>Categorias Rápidas</label>
+        <div class="categorias-row">
+          <button type="button" class="cat-btn active" onclick="setCategoria('Corrida/Trabalho', this)">Corrida</button>
+          <button type="button" class="cat-btn" onclick="setCategoria('Combustível', this)">Combustível</button>
+          <button type="button" class="cat-btn" onclick="setCategoria('Pessoal', this)">Pessoal</button>
+        </div>
+
+        <label for="form-categoria-select">Categoria Completa</label>
+        <select id="form-categoria-select" onchange="setCategoria(this.value, null)">
+          <option value="Corrida/Trabalho">Corrida/Trabalho</option>
+          <option value="Combustível">Combustível</option>
+          <option value="Pessoal">Pessoal (Alimentação / Lazer)</option>
+          <option value="Fixo (aluguel/contas)">Fixo (aluguel/contas/seguro)</option>
+          <option value="Manutenção">Manutenção / Troca de Óleo</option>
+          <option value="Dívida">Dívida (Abatimento)</option>
+        </select>
+
+        <label for="form-data">Data</label>
+        <input type="date" id="form-data">
+
+        <label for="form-desc">Descrição / Nota (opcional)</label>
+        <input type="text" id="form-desc" placeholder="Ex: Posto Ipiranga, Uber + 99...">
+
+        <button id="btn-submit-lancamento" class="btn-submit" onclick="salvarLancamento()">
+          Salvar Lançamento
+        </button>
+      </div>
+    </div>
+
+    <!-- ABA 3: METAS UBER & MOTIVAÇÃO DE CONQUISTA -->
+    <div id="tab-metas" class="tab-content">
+      <!-- 1. Card Motivação de Conquista -->
+      <div class="card card-motivacao">
+        <div class="motivacao-top">
+          <span class="motivacao-tag">🔥 Motivação de Conquista</span>
+          <button class="btn-reload-frase" onclick="sortearNovaFrase()" title="Sortear nova frase">
+            <span>🎲</span> Nova frase
+          </button>
+        </div>
+        <div id="txt-motivacao">
+          <!-- Frase carregada aleatoriamente via JS -->
+        </div>
+      </div>
+
+      <!-- 2. Planejador de Meta Diária -->
+      <div class="card">
+        <div class="card-header">
+          <h2>🎯 Meta Diária do Motorista</h2>
+          <span style="font-size: 12px; color: var(--muted); cursor: pointer;" onclick="editarMetaDiaria()">Ajustar meta ✏️</span>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+          <div>
+            <span style="font-size: 11px; color: var(--muted); text-transform: uppercase;">Faturado Hoje</span>
+            <div id="meta-faturado-hoje" class="mono" style="font-size: 24px; font-weight: 700; color: var(--cyan);">R$ 0,00</div>
+          </div>
+          <div style="text-align: right;">
+            <span style="font-size: 11px; color: var(--muted); text-transform: uppercase;">Meta do Dia</span>
+            <div id="meta-valor-alvo" class="mono" style="font-size: 18px; font-weight: 600; color: var(--ink);">R$ 300,00</div>
+          </div>
+        </div>
+
+        <!-- Barra de Progresso Laranja Brilhante -->
+        <div class="meta-bar-wrap">
+          <div id="meta-bar-fill" class="meta-bar-fill"></div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 12px;">
+          <span id="meta-porcentagem-hoje">0% concluído</span>
+          <span id="meta-restante-hoje">Faltam R$ 300,00</span>
+        </div>
+
+        <!-- Termômetro de Ritmo -->
+        <label>Termômetro de Ritmo</label>
+        <div class="ritmo-container">
+          <div id="badge-ritmo-abaixo" class="ritmo-badge abaixo">
+            <span class="icon">🐢</span>
+            <span>Abaixo</span>
+          </div>
+          <div id="badge-ritmo-ritmo" class="ritmo-badge ritmo">
+            <span class="icon">⚡</span>
+            <span>No Ritmo</span>
+          </div>
+          <div id="badge-ritmo-voando" class="ritmo-badge voando">
+            <span class="icon">🚀</span>
+            <span>Voando</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Objetivos de Longo Prazo do Motorista -->
+      <div class="card">
+        <div class="card-header">
+          <h2>🏆 Objetivos Reais de Longo Prazo</h2>
+          <span class="badge-ai">Visão de Futuro</span>
+        </div>
+
+        <!-- 1º Quitar dívidas Nubank -->
+        <div class="objetivo-item">
+          <div class="objetivo-header">
+            <div class="objetivo-title">
+              <span>💳</span> 1º Quitar Dívidas (Nubank)
+            </div>
+            <span class="objetivo-priority p-1">Prioridade Máxima</span>
+          </div>
+          <p class="objetivo-desc">
+            Zerar a fatura e empréstimos para limpar o nome e ter tranquilidade total sem pagar juros abusivos.
+          </p>
+          <div class="divida-bar" style="margin-top: 4px;">
+            <div class="divida-fill" id="bar-divida-metas"></div>
+          </div>
+          <div class="objetivo-status">
+            <span id="status-divida-paga">R$ 0,00 amortizados</span>
+            <span id="status-divida-resta" style="color: var(--coral);">Resta R$ 7.000,00</span>
+          </div>
+        </div>
+
+        <!-- 2º Comprar Carro Elétrico (EV) -->
+        <div class="objetivo-item">
+          <div class="objetivo-header">
+            <div class="objetivo-title">
+              <span>⚡</span> 2º Comprar Carro Elétrico (EV)
+            </div>
+            <span class="objetivo-priority p-2">Próximo Passo</span>
+          </div>
+          <p class="objetivo-desc">
+            O Onix está no corre hoje para trocar o combustível fóssil pela tomada amanhã. Economia bruta de combustível direto pro bolso.
+          </p>
+          <div class="objetivo-status">
+            <span>Foco: Reserva de entrada</span>
+            <span style="color: var(--cyan);">Meta: BYD / Dolphin Mini</span>
+          </div>
+        </div>
+
+        <!-- 3º Comprar uma Chácara -->
+        <div class="objetivo-item">
+          <div class="objetivo-header">
+            <div class="objetivo-title">
+              <span>🏡</span> 3º Comprar uma Chácara
+            </div>
+            <span class="objetivo-priority p-3">Sonho Maior</span>
+          </div>
+          <p class="objetivo-desc">
+            Terreno amplo, churrasqueira, pomar e paz com a família nos fins de semana. A verdadeira recompensa do corre diário no asfalto.
+          </p>
+          <div class="objetivo-status">
+            <span>Liberdade financeira</span>
+            <span style="color: var(--violet);">Patrimônio familiar</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ABA 4: GASTOS POR CATEGORIA & EVOLUÇÃO (GRÁFICOS) -->
+    <div id="tab-graficos" class="tab-content">
+      <!-- 1. Gráfico de Barras Horizontais (Ranking de Gastos) -->
+      <div class="card">
+        <div class="card-header">
+          <h2>📊 Gastos por Categoria</h2>
+          <span id="chart-mes-label" style="font-size: 12px; color: var(--muted); text-transform: capitalize;">Setembro de 2026</span>
+        </div>
+
+        <div style="margin-bottom: 12px; display: flex; justify-content: space-between; align-items: baseline;">
+          <span style="font-size: 12px; color: var(--muted);">Total de despesas no mês:</span>
+          <span id="chart-total-gastos" class="mono" style="font-size: 16px; font-weight: 700; color: var(--coral);">R$ 0,00</span>
+        </div>
+
+        <div class="chart-container-box">
+          <canvas id="chart-categorias"></canvas>
+        </div>
+      </div>
+
+      <!-- Ranking Detalhado -->
+      <div class="card">
+        <h2>Ranking das Despesas</h2>
+        <div id="ranking-gastos-lista">
+          <!-- Renderizado via JS -->
+        </div>
+      </div>
+
+      <!-- 2. Gráfico de Evolução 6 Meses (Faturamento vs. Gastos) -->
+      <div class="card">
+        <div class="card-header">
+          <h2>📈 Evolução (Últimos 6 Meses)</h2>
+          <span style="font-size: 11px; color: var(--muted);">Faturou vs. Gastou</span>
+        </div>
+
+        <div class="chart-container-box" style="min-height: 240px;">
+          <canvas id="chart-evolucao"></canvas>
+        </div>
+
+        <div style="display: flex; justify-content: center; gap: 18px; margin-top: 10px; font-size: 12px; font-weight: 600;">
+          <span style="display: flex; align-items: center; gap: 6px; color: var(--cyan);">
+            <span style="width: 10px; height: 10px; border-radius: 2px; background: var(--cyan); display: inline-block;"></span> Faturamento
+          </span>
+          <span style="display: flex; align-items: center; gap: 6px; color: var(--coral);">
+            <span style="width: 10px; height: 10px; border-radius: 2px; background: var(--coral); display: inline-block;"></span> Despesas
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ABA 5: EXTRATO / HISTÓRICO -->
+    <div id="tab-historico" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <h2>Extrato do Mês</h2>
+          <select id="filtro-tipo" style="width: auto; margin-bottom: 0; padding: 6px 10px; font-size: 12px;" onchange="renderizarHistorico()">
+            <option value="todos">Todos</option>
+            <option value="in">Apenas Entradas</option>
+            <option value="out">Apenas Saídas</option>
+          </select>
+        </div>
+        <div id="lista-completa">
+          <!-- Renderizado via JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ABA 6: CONFIGURAÇÕES & BACKUP -->
+    <div id="tab-config" class="tab-content">
+      <div class="card">
+        <h2>Metas & Dívidas</h2>
+        <label for="cfg-divida-total">Valor Total da Dívida Inicial - Nubank (R$)</label>
+        <input type="number" id="cfg-divida-total" step="100" placeholder="Ex: 7000">
+
+        <label for="cfg-meta-diaria">Meta Diária Padrão (R$)</label>
+        <input type="number" id="cfg-meta-diaria" step="50" placeholder="Ex: 300">
+
+        <label for="cfg-aluguel-valor">Valor do Aluguel Rápido (R$)</label>
+        <input type="number" id="cfg-aluguel-valor" step="10" placeholder="Ex: 600">
+
+        <button class="btn-submit" onclick="salvarConfiguracoes()">Salvar Configurações</button>
+      </div>
+
+      <!-- Backup e Restauração -->
+      <div class="card">
+        <h2>📦 Backup & Download dos Dados</h2>
+        <p style="font-size: 12px; color: var(--muted); margin-bottom: 10px;">
+          Exporte seus dados em CSV para abrir no Excel, salvar no Google Drive/WhatsApp ou restaurar em outro aparelho.
+        </p>
+
+        <div class="backup-grid">
+          <button class="btn-backup primary" onclick="exportarCSV()">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span>Baixar / Salvar Backup (.csv)</span>
+          </button>
+
+          <button class="btn-backup" onclick="dispararInputImportacao()">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <span>Importar Backup (.csv)</span>
+          </button>
+        </div>
+
+        <!-- Input invisível de upload de arquivo -->
+        <input type="file" id="input-import-csv" accept=".csv,text/csv" style="display: none;" onchange="processarArquivoCSV(this)">
+      </div>
+
+      <div class="card">
+        <h2>Gerenciamento de Dados</h2>
+        <p style="font-size: 12px; color: var(--muted); margin-bottom: 12px;">Todos os seus dados estão salvos com segurança no armazenamento local do seu navegador.</p>
+        <button class="btn-submit" style="background: var(--surface2); color: var(--coral); border: 1px solid var(--coral);" onclick="limparTodosDados()">
+          Resetar Todos os Dados
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom Navigation Bar (6 Itens) -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-tab="resumo" onclick="trocarAba('resumo')">
+      <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+      <span>Resumo</span>
+    </button>
+    <button class="nav-item" data-tab="lancamento" onclick="trocarAba('lancamento')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+      <span>Lançar</span>
+    </button>
+    <button class="nav-item" data-tab="metas" onclick="trocarAba('metas')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+      <span>Metas</span>
+    </button>
+    <button class="nav-item" data-tab="graficos" onclick="trocarAba('graficos')">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <span>Gráficos</span>
+    </button>
+    <button class="nav-item" data-tab="historico" onclick="trocarAba('historico')">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      <span>Extrato</span>
+    </button>
+    <button class="nav-item" data-tab="config" onclick="trocarAba('config')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span>Ajustes</span>
+    </button>
+  </nav>
+
+  <script>
+    // --- MOTIVAÇÃO DE CONQUISTA ---
+    const frasesMotivacao = [
+      "Bora acelerar! Cada corrida de hoje te deixa mais perto de zerar as dívidas e limpar seu nome.",
+      "Foco no asfalto! O Onix está fazendo o corre que vai te colocar no volante do seu futuro carro elétrico.",
+      "Mantenha a disciplina. A meta de hoje é o tijolo que vai construir a sua futura chácara.",
+      "De domingo a domingo a gente cansa, mas lembra: o objetivo é a liberdade de não dever nada a ninguém.",
+      "Mais uma corrida finalizada. Menos um pedaço da dívida, mais perto da tranquilidade da sua chácara.",
+      "Trabalhe duro hoje para trocar o posto de combustível pela tomada do seu carro elétrico amanhã!"
+    ];
+
+    // --- ESTADO GLOBAL & PERSISTÊNCIA ---
+    let mesAtual = new Date().getMonth();
+    let anoAtual = new Date().getFullYear();
+    let tipoAtual = 'in'; // 'in' ou 'out'
+    let meuGraficoCategorias = null; // Instância ativa do Chart.js (Categorias)
+    let meuGraficoEvolucao = null;   // Instância ativa do Chart.js (Evolução 6 meses)
+
+    const NOMES_MESES = [
+      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+    ];
+
+    // Configurações padrão
+    let config = {
+      dividaInicial: 7000,
+      valorAluguelRapido: 600,
+      metaDiaria: 300
+    };
+
+    // Recupera dados do localStorage ou inicia com exemplos
+    function carregarDados() {
+      const cfgSalva = localStorage.getItem('meucontrole_config');
+      if (cfgSalva) {
+        try { config = Object.assign(config, JSON.parse(cfgSalva)); } catch (e) {}
+      }
+      
+      const dadosSalvos = localStorage.getItem('meucontrole_lancamentos');
+      if (dadosSalvos) {
+        try {
+          return JSON.parse(dadosSalvos);
+        } catch (e) {
+          return [];
+        }
+      } else {
+        const hojeIso = new Date().toISOString().split('T')[0];
+        
+        function mesPassadoIso(mesesAtras) {
+          const d = new Date();
+          d.setMonth(d.getMonth() - mesesAtras);
+          return d.toISOString().split('T')[0];
+        }
+
+        const dadosIniciais = [
+          { id: '1', tipo: 'in', valor: 3800.00, horas: 160, categoria: 'Corrida/Trabalho', desc: 'Uber + 99 faturamento mensal', data: mesPassadoIso(4) },
+          { id: '2', tipo: 'out', valor: 1450.00, horas: 0, categoria: 'Combustível', desc: 'Gasolina e etanol', data: mesPassadoIso(4) },
+          { id: '3', tipo: 'in', valor: 4200.00, horas: 170, categoria: 'Corrida/Trabalho', desc: 'Uber + 99 faturamento mensal', data: mesPassadoIso(3) },
+          { id: '4', tipo: 'out', valor: 1600.00, horas: 0, categoria: 'Combustível', desc: 'Combustível', data: mesPassadoIso(3) },
+          { id: '5', tipo: 'in', valor: 4600.00, horas: 180, categoria: 'Corrida/Trabalho', desc: 'Uber + 99 faturamento mensal', data: mesPassadoIso(2) },
+          { id: '6', tipo: 'out', valor: 1750.00, horas: 0, categoria: 'Combustível', desc: 'Combustível', data: mesPassadoIso(2) },
+          { id: '7', tipo: 'in', valor: 4400.00, horas: 175, categoria: 'Corrida/Trabalho', desc: 'Uber + 99 faturamento mensal', data: mesPassadoIso(1) },
+          { id: '8', tipo: 'out', valor: 1680.00, horas: 0, categoria: 'Combustível', desc: 'Combustível', data: mesPassadoIso(1) },
+          // Mês atual
+          { id: '9', tipo: 'in', valor: 280.00, horas: 7, categoria: 'Corrida/Trabalho', desc: 'Uber + 99 - Dia produtivo', data: hojeIso },
+          { id: '10', tipo: 'out', valor: 95.00, horas: 0, categoria: 'Combustível', desc: 'Gasolina Comum Posto Shell', data: hojeIso },
+          { id: '11', tipo: 'out', valor: 40.00, horas: 0, categoria: 'Pessoal', desc: 'Almoço e café na rua', data: hojeIso },
+          { id: '12', tipo: 'out', valor: 600.00, horas: 0, categoria: 'Fixo (aluguel/contas)', desc: 'Aluguel do carro semanal', data: hojeIso },
+          { id: '13', tipo: 'out', valor: 350.00, horas: 0, categoria: 'Dívida', desc: 'Amortização de dívida Nubank', data: hojeIso }
+        ];
+        localStorage.setItem('meucontrole_lancamentos', JSON.stringify(dadosIniciais));
+        return dadosIniciais;
+      }
+    }
+
+    let lancamentos = carregarDados();
+
+    function salvarDados() {
+      localStorage.setItem('meucontrole_lancamentos', JSON.stringify(lancamentos));
+      localStorage.setItem('meucontrole_config', JSON.stringify(config));
+    }
+
+    // --- FORMATAÇÃO ---
+    function formatarMoeda(val) {
+      return (val || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    // --- NAVEGAÇÃO DE ABAS ---
+    function trocarAba(nomeAba) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.bottom-nav .nav-item').forEach(btn => btn.classList.remove('active'));
+
+      const tabAlvo = document.getElementById('tab-' + nomeAba);
+      if (tabAlvo) tabAlvo.classList.add('active');
+
+      const btnAlvo = document.querySelector(`.bottom-nav .nav-item[data-tab="${nomeAba}"]`);
+      if (btnAlvo) btnAlvo.classList.add('active');
+
+      if (nomeAba === 'resumo') {
+        atualizarResumo();
+      } else if (nomeAba === 'metas') {
+        atualizarMetas();
+      } else if (nomeAba === 'graficos') {
+        atualizarGraficos();
+      } else if (nomeAba === 'historico') {
+        renderizarHistorico();
+      } else if (nomeAba === 'config') {
+        carregarCamposConfig();
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // --- TROCA DE MÊS ---
+    function changeMonth(delta) {
+      mesAtual += delta;
+      if (mesAtual < 0) {
+        mesAtual = 11;
+        anoAtual--;
+      } else if (mesAtual > 11) {
+        mesAtual = 0;
+        anoAtual++;
+      }
+      atualizarResumo();
+      atualizarGraficos();
+    }
+
+    // --- TIPO E CATEGORIA ---
+    function setTipo(tipo) {
+      tipoAtual = tipo;
+      const btnIn = document.getElementById('btn-seg-in');
+      const btnOut = document.getElementById('btn-seg-out');
+      const btnSubmit = document.getElementById('btn-submit-lancamento');
+
+      if (tipo === 'in') {
+        btnIn.className = 'active in';
+        btnOut.className = '';
+        btnSubmit.className = 'btn-submit';
+        btnSubmit.textContent = 'Salvar Entrada (+)';
+      } else {
+        btnIn.className = '';
+        btnOut.className = 'active out';
+        btnSubmit.className = 'btn-submit out';
+        btnSubmit.textContent = 'Salvar Saída (-)';
+      }
+    }
+
+    function setCategoria(catNome, btnElement) {
+      const select = document.getElementById('form-categoria-select');
+      if (select) select.value = catNome;
+
+      document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+      if (btnElement) {
+        btnElement.classList.add('active');
+      } else {
+        document.querySelectorAll('.cat-btn').forEach(b => {
+          if (b.textContent.trim().toLowerCase() === catNome.toLowerCase() ||
+             (catNome === 'Corrida/Trabalho' && b.textContent.trim() === 'Corrida')) {
+            b.classList.add('active');
+          }
+        });
+      }
+    }
+
+    // --- ATALHOS RÁPIDOS ---
+    function lancarAluguelRapido() {
+      setTipo('out');
+      const inputValor = document.getElementById('form-valor');
+      const inputDesc = document.getElementById('form-desc');
+      if (inputValor) inputValor.value = config.valorAluguelRapido;
+      if (inputDesc) inputDesc.value = 'Aluguel do carro semanal';
+      setCategoria('Fixo (aluguel/contas)', null);
+      trocarAba('lancamento');
+    }
+
+    function preencherExemplo(texto) {
+      const campo = document.getElementById('txt-agente');
+      if (campo) {
+        campo.value = texto;
+        processarAgente();
+      }
+    }
+
+    // --- INTELIGÊNCIA DO AGENTE ---
+    function processarAgente() {
+      const campoTexto = document.getElementById('txt-agente');
+      if (!campoTexto || !campoTexto.value.trim()) {
+        alert('Por favor, digite o que rolou no seu dia primeiro.');
+        return;
+      }
+
+      const textoOriginal = campoTexto.value;
+      const textoLimpo = textoOriginal
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+
+      let tipoDefinido = 'in';
+      let categoriaDefinida = 'Corrida/Trabalho';
+      let valorExtraido = null;
+      let horasExtraidas = null;
+
+      // 1 & 2. Detecção de Tipo
+      const termosSaida = [
+        'gastei', 'paguei', 'gasolina', 'combustivel', 'abasteci',
+        'etanol', 'alcool', 'diesel', 'gnv', 'aluguel', 'troca de oleo',
+        'oleo', 'mecanico', 'manutencao', 'lanche', 'almoco', 'jantar', 'cafe', 'comprei'
+      ];
+      const termosEntrada = ['ganhei', 'faturei', 'recebi', 'fiz', 'bruto', 'lucro', 'corridas', 'uber', '99'];
+
+      const temSaida = termosSaida.some(t => textoLimpo.includes(t));
+      const temEntrada = termosEntrada.some(t => textoLimpo.includes(t));
+
+      if (temSaida && !temEntrada) {
+        tipoDefinido = 'out';
+      } else if (temEntrada) {
+        tipoDefinido = 'in';
+      }
+
+      // 3. Extração de Horas
+      const regexHoras = /(?:rodei|trabalhei|fiz|durante)?\s*(\d+(?:[.,]\d+)?)\s*(?:h(?:oras?|rs)?)\b/i;
+      const matchHoras = textoOriginal.match(regexHoras);
+      if (matchHoras) {
+        horasExtraidas = matchHoras[1].replace(',', '.');
+      }
+
+      // 4. Extração de Valor Monetário
+      const regexValorForte = /(?:r\$\s*|ganhei\s+|faturei\s+|gastei\s+|paguei\s+|deu\s+)(\d+(?:[.,]\d{1,2})?)/i;
+      const matchForte = textoOriginal.match(regexValorForte);
+
+      if (matchForte) {
+        valorExtraido = matchForte[1].replace(',', '.');
+      } else {
+        const todosNumeros = [...textoOriginal.matchAll(/\b(\d+(?:[.,]\d{1,2})?)\b/g)];
+        for (const item of todosNumeros) {
+          const numStr = item[1];
+          if (horasExtraidas && numStr === matchHoras[1]) {
+            continue;
+          }
+          valorExtraido = numStr.replace(',', '.');
+          break;
+        }
+      }
+
+      // 5. Detecção de Categoria
+      if (/gasolina|combustivel|abastec|posto|etanol|alcool|diesel|gnv/i.test(textoLimpo)) {
+        categoriaDefinida = 'Combustível';
+        tipoDefinido = 'out';
+      } else if (/aluguel|locacao|parcela|seguro|ipva/i.test(textoLimpo)) {
+        categoriaDefinida = 'Fixo (aluguel/contas)';
+        tipoDefinido = 'out';
+      } else if (/divida|nubank|emprestimo|quitei|amortiz/i.test(textoLimpo)) {
+        categoriaDefinida = 'Dívida';
+        tipoDefinido = 'out';
+      } else if (/almoco|jantar|lanche|comida|cafe|refeicao|farmacia/i.test(textoLimpo)) {
+        categoriaDefinida = 'Pessoal';
+        tipoDefinido = 'out';
+      } else if (/mecanic|oficina|oleo|pneu|revisao|manutenc/i.test(textoLimpo)) {
+        categoriaDefinida = 'Manutenção';
+        tipoDefinido = 'out';
+      } else if (/corrida|viagem|uber|99|passageiro/i.test(textoLimpo)) {
+        categoriaDefinida = 'Corrida/Trabalho';
+        tipoDefinido = 'in';
+      }
+
+      // Aplicar valores nos campos
+      setTipo(tipoDefinido);
+      setCategoria(categoriaDefinida, null);
+
+      if (valorExtraido) {
+        const inputValor = document.getElementById('form-valor');
+        if (inputValor) inputValor.value = parseFloat(valorExtraido).toFixed(2);
+      }
+      if (horasExtraidas) {
+        const inputHoras = document.getElementById('form-horas');
+        if (inputHoras) inputHoras.value = horasExtraidas;
+      }
+      const inputDesc = document.getElementById('form-desc');
+      if (inputDesc) {
+        inputDesc.value = textoOriginal.trim();
+      }
+
+      // Limpar campo do agente
+      campoTexto.value = '';
+
+      // Feedback toast
+      const toast = document.getElementById('toast-banner');
+      const toastMsg = document.getElementById('toast-msg');
+      if (toast && toastMsg) {
+        toastMsg.textContent = `Identificado: ${tipoDefinido === 'in' ? 'Entrada (+)' : 'Saída (-)'} de R$ ${valorExtraido || '0,00'} em "${categoriaDefinida}". Revise e confirme!`;
+        toast.style.display = 'flex';
+        setTimeout(() => { toast.style.display = 'none'; }, 6000);
+      }
+
+      // Redireciona para a aba de Lançamento
+      trocarAba('lancamento');
+    }
+
+    // --- SALVAR NOVO LANÇAMENTO ---
+    function salvarLancamento() {
+      const inputValor = document.getElementById('form-valor');
+      const inputHoras = document.getElementById('form-horas');
+      const selectCat = document.getElementById('form-categoria-select');
+      const inputData = document.getElementById('form-data');
+      const inputDesc = document.getElementById('form-desc');
+
+      const val = parseFloat(inputValor.value);
+      if (isNaN(val) || val <= 0) {
+        alert('Por favor, informe um valor válido maior que zero.');
+        inputValor.focus();
+        return;
+      }
+
+      const novoItem = {
+        id: Date.now().toString(),
+        tipo: tipoAtual,
+        valor: val,
+        horas: parseFloat(inputHoras.value) || 0,
+        categoria: selectCat.value || 'Corrida/Trabalho',
+        desc: inputDesc.value.trim() || selectCat.value,
+        data: inputData.value || new Date().toISOString().split('T')[0]
+      };
+
+      lancamentos.unshift(novoItem);
+      salvarDados();
+
+      // Limpa formulário
+      inputValor.value = '';
+      inputHoras.value = '';
+      inputDesc.value = '';
+
+      alert('Lançamento salvo com sucesso!');
+      atualizarResumo();
+      atualizarGraficos();
+      trocarAba('resumo');
+    }
+
+    // --- EXCLUIR LANÇAMENTO ---
+    function excluirLancamento(id) {
+      if (confirm('Deseja realmente excluir este lançamento?')) {
+        lancamentos = lancamentos.filter(item => item.id !== id);
+        salvarDados();
+        atualizarResumo();
+        atualizarGraficos();
+        renderizarHistorico();
+      }
+    }
+
+    // --- ATUALIZAR RESUMO & CÁLCULOS ---
+    function atualizarResumo() {
+      const lblMes = document.getElementById('lbl-mes-ano');
+      if (lblMes) {
+        lblMes.textContent = `${NOMES_MESES[mesAtual]} de ${anoAtual}`;
+      }
+
+      const itensDoMes = lancamentos.filter(item => {
+        if (!item.data) return false;
+        const [ano, mes] = item.data.split('-').map(Number);
+        return ano === anoAtual && (mes - 1) === mesAtual;
+      });
+
+      let totalFaturou = 0;
+      let totalGastou = 0;
+      let totalHoras = 0;
+
+      itensDoMes.forEach(item => {
+        if (item.tipo === 'in') {
+          totalFaturou += Number(item.valor) || 0;
+          totalHoras += Number(item.horas) || 0;
+        } else {
+          totalGastou += Number(item.valor) || 0;
+        }
+      });
+
+      const sobra = totalFaturou - totalGastou;
+
+      const elSobra = document.getElementById('val-sobra');
+      const elFaturou = document.getElementById('val-faturou');
+      const elGastou = document.getElementById('val-gastou');
+      const elHoras = document.getElementById('val-horas-total');
+
+      if (elFaturou) elFaturou.textContent = formatarMoeda(totalFaturou);
+      if (elGastou) elGastou.textContent = formatarMoeda(totalGastou);
+      if (elHoras) elHoras.textContent = totalHoras.toFixed(1) + 'h';
+
+      if (elSobra) {
+        elSobra.textContent = formatarMoeda(sobra);
+        if (sobra < 0) {
+          elSobra.classList.add('neg');
+        } else {
+          elSobra.classList.remove('neg');
+        }
+      }
+
+      // Dívida Nubank (Total Paga vs Restante)
+      const totalAbatidoDivida = lancamentos
+        .filter(item => item.categoria === 'Dívida' && item.tipo === 'out')
+        .reduce((sum, item) => sum + (Number(item.valor) || 0), 0);
+
+      const dividaInicial = Number(config.dividaInicial) || 7000;
+      const dividaRestante = Math.max(0, dividaInicial - totalAbatidoDivida);
+      const percPago = Math.min(100, Math.round((totalAbatidoDivida / dividaInicial) * 100)) || 0;
+
+      const elDividaRestante = document.getElementById('val-divida-restante');
+      const barDivida = document.getElementById('bar-divida');
+      if (elDividaRestante) {
+        elDividaRestante.textContent = formatarMoeda(dividaRestante);
+      }
+      if (barDivida) {
+        barDivida.style.width = percPago + '%';
+        barDivida.title = `${percPago}% quitado (${formatarMoeda(totalAbatidoDivida)})`;
+      }
+
+      // Status da Meta Diária na Home
+      const hojeIso = new Date().toISOString().split('T')[0];
+      const faturadoHoje = lancamentos
+        .filter(item => item.tipo === 'in' && item.data === hojeIso)
+        .reduce((sum, item) => sum + (Number(item.valor) || 0), 0);
+      const metaAlvo = Number(config.metaDiaria) || 300;
+      const pctHoje = Math.round((faturadoHoje / metaAlvo) * 100);
+      const elStatusMetaHome = document.getElementById('val-status-meta-home');
+      if (elStatusMetaHome) {
+        let textoRitmo = '🐢 Abaixo';
+        if (pctHoje >= 100) textoRitmo = '🚀 Voando';
+        else if (pctHoje >= 50) textoRitmo = '⚡ No Ritmo';
+        elStatusMetaHome.textContent = `${pctHoje}% (${textoRitmo})`;
+      }
+
+      // Renderiza os 4 últimos lançamentos na home
+      const listaUltimos = document.getElementById('lista-ultimos');
+      if (listaUltimos) {
+        const ultimos = itensDoMes.slice(0, 4);
+        if (ultimos.length === 0) {
+          listaUltimos.innerHTML = '<div class="empty-state">Nenhum lançamento registrado neste mês. Digite no agente ou use a aba Lançar!</div>';
+        } else {
+          listaUltimos.innerHTML = ultimos.map(item => criarLinhaItemHtml(item)).join('');
+        }
+      }
+    }
+
+    // --- LÓGICA DA ABA METAS & MOTIVAÇÃO ---
+    function sortearNovaFrase() {
+      const elFrase = document.getElementById('txt-motivacao');
+      if (!elFrase) return;
+      elFrase.style.opacity = '0.2';
+      setTimeout(() => {
+        const indiceAleatorio = Math.floor(Math.random() * frasesMotivacao.length);
+        elFrase.textContent = frasesMotivacao[indiceAleatorio];
+        elFrase.style.opacity = '1';
+      }, 150);
+    }
+
+    function editarMetaDiaria() {
+      const novoValor = prompt('Qual é a sua meta diária de faturamento (R$)?', config.metaDiaria || 300);
+      if (novoValor && !isNaN(parseFloat(novoValor)) && parseFloat(novoValor) > 0) {
+        config.metaDiaria = parseFloat(novoValor);
+        salvarDados();
+        atualizarMetas();
+        atualizarResumo();
+      }
+    }
+
+    function atualizarMetas() {
+      // 1. Sorteia uma frase de motivação
+      sortearNovaFrase();
+
+      // 2. Calcula Faturamento de Hoje
+      const hojeIso = new Date().toISOString().split('T')[0];
+      const faturadoHoje = lancamentos
+        .filter(item => item.tipo === 'in' && item.data === hojeIso)
+        .reduce((sum, item) => sum + (Number(item.valor) || 0), 0);
+
+      const metaAlvo = Number(config.metaDiaria) || 300;
+      const porcentagem = Math.min(100, Math.round((faturadoHoje / metaAlvo) * 100)) || 0;
+      const restante = Math.max(0, metaAlvo - faturadoHoje);
+
+      const elFaturadoHoje = document.getElementById('meta-faturado-hoje');
+      const elMetaAlvo = document.getElementById('meta-valor-alvo');
+      const elBarFill = document.getElementById('meta-bar-fill');
+      const elPctHoje = document.getElementById('meta-porcentagem-hoje');
+      const elRestanteHoje = document.getElementById('meta-restante-hoje');
+
+      if (elFaturadoHoje) elFaturadoHoje.textContent = formatarMoeda(faturadoHoje);
+      if (elMetaAlvo) elMetaAlvo.textContent = formatarMoeda(metaAlvo);
+      if (elBarFill) elBarFill.style.width = porcentagem + '%';
+      if (elPctHoje) elPctHoje.textContent = `${porcentagem}% da meta atingida`;
+      if (elRestanteHoje) {
+        elRestanteHoje.textContent = restante === 0 ? '🎉 Meta batida hoje!' : `Faltam ${formatarMoeda(restante)}`;
+      }
+
+      // 3. Termômetro de Ritmo
+      const badgeAbaixo = document.getElementById('badge-ritmo-abaixo');
+      const badgeRitmo = document.getElementById('badge-ritmo-ritmo');
+      const badgeVoando = document.getElementById('badge-ritmo-voando');
+
+      [badgeAbaixo, badgeRitmo, badgeVoando].forEach(b => { if (b) b.classList.remove('active'); });
+
+      if (porcentagem >= 100) {
+        if (badgeVoando) badgeVoando.classList.add('active');
+      } else if (porcentagem >= 50) {
+        if (badgeRitmo) badgeRitmo.classList.add('active');
+      } else {
+        if (badgeAbaixo) badgeAbaixo.classList.add('active');
+      }
+
+      // 4. Atualiza progresso da dívida Nubank nos objetivos
+      const totalAbatido = lancamentos
+        .filter(item => item.categoria === 'Dívida' && item.tipo === 'out')
+        .reduce((sum, item) => sum + (Number(item.valor) || 0), 0);
+      const dividaInicial = Number(config.dividaInicial) || 7000;
+      const dividaRestante = Math.max(0, dividaInicial - totalAbatido);
+      const pctDivida = Math.min(100, Math.round((totalAbatido / dividaInicial) * 100)) || 0;
+
+      const barDividaMetas = document.getElementById('bar-divida-metas');
+      const statusPaga = document.getElementById('status-divida-paga');
+      const statusResta = document.getElementById('status-divida-resta');
+
+      if (barDividaMetas) barDividaMetas.style.width = pctDivida + '%';
+      if (statusPaga) statusPaga.textContent = `${formatarMoeda(totalAbatido)} quitados (${pctDivida}%)`;
+      if (statusResta) statusResta.textContent = dividaRestante === 0 ? 'DÍVIDA NUBANK ZERADA! 🎉' : `Resta ${formatarMoeda(dividaRestante)}`;
+    }
+
+    // --- FUNÇÕES DE GRÁFICOS (CHART.JS) ---
+    function atualizarGraficos() {
+      atualizarGraficoCategorias();
+      atualizarGraficoEvolucao();
+    }
+
+    // 1. Gráfico de Categorias de Gastos (Barras Horizontais)
+    function atualizarGraficoCategorias() {
+      const lblChartMes = document.getElementById('chart-mes-label');
+      if (lblChartMes) {
+        lblChartMes.textContent = `${NOMES_MESES[mesAtual]} de ${anoAtual}`;
+      }
+
+      const despesasDoMes = lancamentos.filter(item => {
+        if (!item.data || item.tipo !== 'out') return false;
+        const [ano, mes] = item.data.split('-').map(Number);
+        return ano === anoAtual && (mes - 1) === mesAtual;
+      });
+
+      const totaisPorCategoria = {};
+      let totalGastoGeral = 0;
+
+      despesasDoMes.forEach(item => {
+        const cat = item.categoria || 'Outros';
+        const v = Number(item.valor) || 0;
+        totaisPorCategoria[cat] = (totaisPorCategoria[cat] || 0) + v;
+        totalGastoGeral += v;
+      });
+
+      const elTotalGastos = document.getElementById('chart-total-gastos');
+      if (elTotalGastos) {
+        elTotalGastos.textContent = formatarMoeda(totalGastoGeral);
+      }
+
+      const categoriasOrdenadas = Object.keys(totaisPorCategoria).sort(
+        (a, b) => totaisPorCategoria[b] - totaisPorCategoria[a]
+      );
+      const valoresOrdenados = categoriasOrdenadas.map(cat => totaisPorCategoria[cat]);
+
+      // Ranking
+      const containerRanking = document.getElementById('ranking-gastos-lista');
+      if (containerRanking) {
+        if (categoriasOrdenadas.length === 0) {
+          containerRanking.innerHTML = '<div class="empty-state">Nenhum gasto registrado em ' + NOMES_MESES[mesAtual] + '.</div>';
+        } else {
+          containerRanking.innerHTML = categoriasOrdenadas.map((cat, idx) => {
+            const val = totaisPorCategoria[cat];
+            const pct = totalGastoGeral > 0 ? ((val / totalGastoGeral) * 100).toFixed(1) : 0;
+            return `
+              <div class="ranking-item">
+                <div class="ranking-left">
+                  <div class="ranking-pos ${idx === 0 ? 'top1' : ''}">${idx + 1}</div>
+                  <div class="ranking-name">${cat}</div>
+                </div>
+                <div class="ranking-right">
+                  <div class="ranking-val">${formatarMoeda(val)}</div>
+                  <div class="ranking-pct">${pct}% do total</div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
+      const canvas = document.getElementById('chart-categorias');
+      if (!canvas) return;
+
+      if (typeof Chart === 'undefined') {
+        setTimeout(atualizarGraficoCategorias, 200);
+        return;
+      }
+
+      if (meuGraficoCategorias) {
+        meuGraficoCategorias.destroy();
+        meuGraficoCategorias = null;
+      }
+
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      if (categoriasOrdenadas.length === 0) {
+        meuGraficoCategorias = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: ['Sem despesas'],
+            datasets: [{
+              data: [0],
+              backgroundColor: 'rgba(124, 138, 174, 0.2)'
+            }]
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: { enabled: false } },
+            scales: { x: { display: false }, y: { ticks: { color: '#7C8AAE' }, grid: { display: false } } }
+          }
+        });
+        return;
+      }
+
+      const backgroundColors = categoriasOrdenadas.map((_, i) => {
+        if (i === 0) return '#FF5C7C';
+        if (i === 1) return 'rgba(255, 92, 124, 0.85)';
+        if (i === 2) return 'rgba(255, 92, 124, 0.7)';
+        return 'rgba(255, 92, 124, 0.55)';
+      });
+
+      meuGraficoCategorias = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: categoriasOrdenadas,
+          datasets: [{
+            label: 'Total Gasto (R$)',
+            data: valoresOrdenados,
+            backgroundColor: backgroundColors,
+            borderColor: '#FF5C7C',
+            borderWidth: 1,
+            borderRadius: 6,
+            barThickness: 20
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#0F1830',
+              titleColor: '#E9EEFC',
+              bodyColor: '#34E7C0',
+              borderColor: '#22304F',
+              borderWidth: 1,
+              padding: 10,
+              displayColors: false,
+              callbacks: {
+                label: function(context) {
+                  return 'Gasto: ' + formatarMoeda(context.raw);
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              beginAtZero: true,
+              grid: { color: 'rgba(34, 48, 79, 0.45)', drawBorder: false },
+              ticks: {
+                color: '#7C8AAE',
+                font: { family: "'JetBrains Mono', monospace", size: 11 },
+                callback: function(value) { return 'R$' + value; }
+              }
+            },
+            y: {
+              grid: { display: false },
+              ticks: {
+                color: '#E9EEFC',
+                font: { family: "'Space Grotesk', sans-serif", size: 12, weight: '600' }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // 2. Gráfico de Evolução 6 Meses (Faturamento vs. Gastos)
+    function atualizarGraficoEvolucao() {
+      const canvas = document.getElementById('chart-evolucao');
+      if (!canvas) return;
+
+      if (typeof Chart === 'undefined') {
+        setTimeout(atualizarGraficoEvolucao, 200);
+        return;
+      }
+
+      const mesesChave = [];
+      const labelsMeses = [];
+      const ABREV_MESES = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+
+      for (let i = 5; i >= 0; i--) {
+        const d = new Date(anoAtual, mesAtual - i, 1);
+        const m = d.getMonth();
+        const y = d.getFullYear();
+        const chave = `${y}-${String(m + 1).padStart(2, '0')}`;
+        mesesChave.push(chave);
+        labelsMeses.push(`${ABREV_MESES[m]}/${String(y).slice(2)}`);
+      }
+
+      const faturamentoPorMes = mesesChave.map(() => 0);
+      const gastosPorMes = mesesChave.map(() => 0);
+
+      lancamentos.forEach(item => {
+        if (!item.data) return;
+        const prefixoMes = item.data.slice(0, 7);
+        const idx = mesesChave.indexOf(prefixoMes);
+        if (idx !== -1) {
+          const v = Number(item.valor) || 0;
+          if (item.tipo === 'in') {
+            faturamentoPorMes[idx] += v;
+          } else {
+            gastosPorMes[idx] += v;
+          }
+        }
+      });
+
+      if (meuGraficoEvolucao) {
+        meuGraficoEvolucao.destroy();
+        meuGraficoEvolucao = null;
+      }
+
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      meuGraficoEvolucao = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labelsMeses,
+          datasets: [
+            {
+              label: 'Faturou',
+              data: faturamentoPorMes,
+              backgroundColor: '#34E7C0',
+              borderColor: '#34E7C0',
+              borderWidth: 1,
+              borderRadius: 4,
+              barPercentage: 0.8,
+              categoryPercentage: 0.7
+            },
+            {
+              label: 'Gastou',
+              data: gastosPorMes,
+              backgroundColor: '#FF5C7C',
+              borderColor: '#FF5C7C',
+              borderWidth: 1,
+              borderRadius: 4,
+              barPercentage: 0.8,
+              categoryPercentage: 0.7
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#0F1830',
+              titleColor: '#E9EEFC',
+              bodyColor: '#FFFFFF',
+              borderColor: '#22304F',
+              borderWidth: 1,
+              padding: 10,
+              callbacks: {
+                label: function(context) {
+                  return context.dataset.label + ': ' + formatarMoeda(context.raw);
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: {
+                color: '#7C8AAE',
+                font: { family: "'Space Grotesk', sans-serif", size: 11, weight: '600' }
+              }
+            },
+            y: {
+              beginAtZero: true,
+              grid: { color: 'rgba(34, 48, 79, 0.45)', drawBorder: false },
+              ticks: {
+                color: '#7C8AAE',
+                font: { family: "'JetBrains Mono', monospace", size: 10 },
+                callback: function(value) {
+                  if (value >= 1000) return 'R$' + (value / 1000).toFixed(1) + 'k';
+                  return 'R$' + value;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // --- HTML DE ITEM DA LISTA ---
+    function criarLinhaItemHtml(item) {
+      const dataFormatada = item.data ? item.data.split('-').reverse().slice(0, 2).join('/') : '--/--';
+      const sinal = item.tipo === 'in' ? '+' : '-';
+      const classeCor = item.tipo === 'in' ? 'in' : 'out';
+      const horasBadge = item.horas ? `⏱ ${item.horas}h` : '';
+
+      return `
+        <div class="list-item">
+          <div class="item-info">
+            <div class="item-title">
+              <span>${item.desc || item.categoria}</span>
+            </div>
+            <div class="item-desc">
+              <span>${dataFormatada}</span>
+              <span>•</span>
+              <span>${item.categoria}</span>
+              ${horasBadge ? `<span>•</span> <span>${horasBadge}</span>` : ''}
+            </div>
+          </div>
+          <div class="item-val ${classeCor}">
+            <span>${sinal} ${formatarMoeda(item.valor)}</span>
+            <button class="btn-del" title="Excluir" onclick="excluirLancamento('${item.id}')">✕</button>
+          </div>
+        </div>
+      `;
+    }
+
+    // --- RENDERIZAR HISTÓRICO COMPLETO ---
+    function renderizarHistorico() {
+      const container = document.getElementById('lista-completa');
+      const filtro = document.getElementById('filtro-tipo') ? document.getElementById('filtro-tipo').value : 'todos';
+      if (!container) return;
+
+      const itensDoMes = lancamentos.filter(item => {
+        if (!item.data) return false;
+        const [ano, mes] = item.data.split('-').map(Number);
+        const bateData = ano === anoAtual && (mes - 1) === mesAtual;
+        if (!bateData) return false;
+        if (filtro === 'in') return item.tipo === 'in';
+        if (filtro === 'out') return item.tipo === 'out';
+        return true;
+      });
+
+      if (itensDoMes.length === 0) {
+        container.innerHTML = '<div class="empty-state">Nenhum registro para os filtros selecionados.</div>';
+      } else {
+        container.innerHTML = itensDoMes.map(item => criarLinhaItemHtml(item)).join('');
+      }
+    }
+
+    // --- CONFIGURAÇÕES ---
+    function carregarCamposConfig() {
+      const elDivida = document.getElementById('cfg-divida-total');
+      const elMeta = document.getElementById('cfg-meta-diaria');
+      const elAluguel = document.getElementById('cfg-aluguel-valor');
+      if (elDivida) elDivida.value = config.dividaInicial;
+      if (elMeta) elMeta.value = config.metaDiaria || 300;
+      if (elAluguel) elAluguel.value = config.valorAluguelRapido;
+    }
+
+    function salvarConfiguracoes() {
+      const elDivida = document.getElementById('cfg-divida-total');
+      const elMeta = document.getElementById('cfg-meta-diaria');
+      const elAluguel = document.getElementById('cfg-aluguel-valor');
+      if (elDivida && !isNaN(parseFloat(elDivida.value))) {
+        config.dividaInicial = parseFloat(elDivida.value);
+      }
+      if (elMeta && !isNaN(parseFloat(elMeta.value))) {
+        config.metaDiaria = parseFloat(elMeta.value);
+      }
+      if (elAluguel && !isNaN(parseFloat(elAluguel.value))) {
+        config.valorAluguelRapido = parseFloat(elAluguel.value);
+      }
+      salvarDados();
+      alert('Configurações atualizadas com sucesso!');
+      atualizarResumo();
+      atualizarMetas();
+      atualizarGraficos();
+    }
+
+    function limparTodosDados() {
+      if (confirm('Atenção: isto apagará todos os seus lançamentos e redefinirá os dados de fábrica. Confirmar?')) {
+        localStorage.removeItem('meucontrole_lancamentos');
+        localStorage.removeItem('meucontrole_config');
+        lancamentos = [];
+        config = { dividaInicial: 7000, valorAluguelRapido: 600, metaDiaria: 300 };
+        salvarDados();
+        atualizarResumo();
+        atualizarMetas();
+        atualizarGraficos();
+        renderizarHistorico();
+        alert('Dados resetados com sucesso.');
+      }
+    }
+
+    // --- EXPORTAR E IMPORTAR BACKUP CSV ---
+    async function exportarCSV() {
+      if (!lancamentos || lancamentos.length === 0) {
+        alert('Não há lançamentos cadastrados para exportar.');
+        return;
+      }
+
+      const cabecalho = ['ID', 'Tipo', 'Categoria', 'Valor', 'Horas', 'Descricao', 'Data'];
+      const linhas = [cabecalho.join(',')];
+
+      lancamentos.forEach(item => {
+        const descLimpa = `"${(item.desc || '').replace(/"/g, '""').replace(/\r?\n/g, ' ')}"`;
+        const catLimpa = `"${(item.categoria || '').replace(/"/g, '""')}"`;
+        const linha = [
+          item.id || Date.now(),
+          item.tipo || 'in',
+          catLimpa,
+          (Number(item.valor) || 0).toFixed(2),
+          (Number(item.horas) || 0).toString(),
+          descLimpa,
+          item.data || ''
+        ];
+        linhas.push(linha.join(','));
+      });
+
+      const conteudoCSV = '\uFEFF' + linhas.join('\r\n');
+      const dataHoje = new Date().toISOString().split('T')[0];
+      const nomeArquivo = `meucontrole_backup_${dataHoje}.csv`;
+      const blob = new Blob([conteudoCSV], { type: 'text/csv;charset=utf-8;' });
+
+      if (navigator.share && navigator.canShare) {
+        try {
+          const arquivo = new File([blob], nomeArquivo, { type: 'text/csv' });
+          if (navigator.canShare({ files: [arquivo] })) {
+            await navigator.share({
+              files: [arquivo],
+              title: 'Backup Meu Controle',
+              text: 'Backup financeiro de motorista de aplicativo'
+            });
+            return;
+          }
+        } catch (err) {
+          if (err.name !== 'AbortError') {
+            console.warn('Erro ao compartilhar via Share API, usando download direto:', err);
+          } else {
+            return;
+          }
+        }
+      }
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', nomeArquivo);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
+    function dispararInputImportacao() {
+      const input = document.getElementById('input-import-csv');
+      if (input) {
+        input.value = '';
+        input.click();
+      }
+    }
+
+    function processarArquivoCSV(inputElement) {
+      const arquivo = inputElement.files && inputElement.files[0];
+      if (!arquivo) return;
+
+      const leitor = new FileReader();
+      leitor.onload = function(e) {
+        try {
+          const texto = e.target.result;
+          const linhas = texto.split(/\r?\n/).filter(l => l.trim().length > 0);
+
+          if (linhas.length <= 1) {
+            alert('O arquivo selecionado está vazio ou não possui registros.');
+            return;
+          }
+
+          const primeiraLinha = linhas[0];
+          const delimitador = primeiraLinha.includes(';') ? ';' : ',';
+
+          const parseLinhaCSV = (linha) => {
+            const regex = new RegExp(`(?:${delimitador}|^)(?:"([^"]*(?:""[^"]*)*)"|([^"${delimitador}]*))`, 'g');
+            const campos = [];
+            let match;
+            while ((match = regex.exec(linha)) !== null) {
+              let val = match[1] !== undefined ? match[1].replace(/""/g, '"') : match[2];
+              campos.push((val || '').trim());
+            }
+            return campos;
+          };
+
+          const cabecalhos = parseLinhaCSV(linhas[0]).map(c => c.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
+          
+          const idxId = cabecalhos.indexOf('id');
+          const idxTipo = cabecalhos.indexOf('tipo');
+          const idxCat = cabecalhos.indexOf('categoria');
+          const idxValor = cabecalhos.indexOf('valor');
+          const idxHoras = cabecalhos.indexOf('horas');
+          const idxDesc = cabecalhos.indexOf('descricao');
+          const idxData = cabecalhos.indexOf('data');
+
+          const novosLancamentos = [];
+
+          for (let i = 1; i < linhas.length; i++) {
+            const cols = parseLinhaCSV(linhas[i]);
+            if (cols.length < 3) continue;
+
+            let valorRaw = idxValor !== -1 ? cols[idxValor] : cols[3];
+            if (valorRaw) valorRaw = valorRaw.replace('R$', '').trim().replace(',', '.');
+            const valor = parseFloat(valorRaw);
+            if (isNaN(valor) || valor <= 0) continue;
+
+            const tipoRaw = (idxTipo !== -1 ? cols[idxTipo] : cols[1]) || 'in';
+            const tipo = tipoRaw.toLowerCase() === 'out' || tipoRaw.toLowerCase() === 'saida' ? 'out' : 'in';
+            const categoria = (idxCat !== -1 ? cols[idxCat] : cols[2]) || 'Corrida/Trabalho';
+            const horas = parseFloat(idxHoras !== -1 ? cols[idxHoras] : (cols[4] || 0)) || 0;
+            const desc = (idxDesc !== -1 ? cols[idxDesc] : (cols[5] || categoria)) || categoria;
+            const data = (idxData !== -1 ? cols[idxData] : (cols[6] || new Date().toISOString().split('T')[0])) || new Date().toISOString().split('T')[0];
+            const id = (idxId !== -1 && cols[idxId]) ? cols[idxId] : (Date.now() + i).toString();
+
+            novosLancamentos.push({
+              id: id,
+              tipo: tipo,
+              categoria: categoria,
+              valor: valor,
+              horas: horas,
+              desc: desc,
+              data: data
+            });
+          }
+
+          if (novosLancamentos.length === 0) {
+            alert('Nenhum lançamento válido foi encontrado no arquivo.');
+            return;
+          }
+
+          const confirmar = confirm(
+            `Foram identificados ${novosLancamentos.length} lançamentos no arquivo.\n\n` +
+            `Deseja restaurar e substituir todos os dados atuais por este backup?`
+          );
+
+          if (confirmar) {
+            lancamentos = novosLancamentos;
+            salvarDados();
+            atualizarResumo();
+            atualizarMetas();
+            atualizarGraficos();
+            renderizarHistorico();
+            alert(`Backup restaurado com sucesso! ${novosLancamentos.length} lançamentos ativos.`);
+            trocarAba('resumo');
+          }
+        } catch (err) {
+          console.error(err);
+          alert('Erro ao ler arquivo CSV. Verifique se o formato do backup é válido.');
+        }
+      };
+
+      leitor.readAsText(arquivo, 'UTF-8');
+    }
+
+    // --- INICIALIZAÇÃO AO CARREGAR ---
+    window.addEventListener('DOMContentLoaded', () => {
+      const inputData = document.getElementById('form-data');
+      if (inputData) {
+        inputData.value = new Date().toISOString().split('T')[0];
+      }
+
+      const txtAgente = document.getElementById('txt-agente');
+      if (txtAgente) {
+        txtAgente.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            processarAgente();
+          }
+        });
+      }
+
+      atualizarResumo();
+      atualizarGraficos();
+    });
+  </script>
+</body>
+</html>
