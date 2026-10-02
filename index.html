@@ -857,6 +857,118 @@
       color: var(--ink);
       border-color: var(--violet);
     }
+
+    /* Seletor de Modo de Exibição do Saldo (Sobra vs Saldo em Caixa) */
+    .saldo-mode-selector {
+      display: flex;
+      background: rgba(22, 33, 63, 0.7);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 3px;
+      margin-bottom: 12px;
+      gap: 4px;
+    }
+    .saldo-mode-btn {
+      flex: 1;
+      border: none;
+      background: none;
+      padding: 7px 4px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: center;
+    }
+    .saldo-mode-btn.active {
+      background: var(--surface2);
+      color: var(--ink);
+      border: 1px solid var(--line);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    }
+    .saldo-mode-btn.active#btn-modo-sobra {
+      color: var(--cyan);
+      border-color: rgba(52, 231, 192, 0.3);
+    }
+    .saldo-mode-btn.active#btn-modo-caixa {
+      color: var(--violet);
+      border-color: rgba(140, 123, 255, 0.3);
+    }
+
+    .btn-hoje-badge {
+      background: var(--violet-soft);
+      border: 1px solid rgba(140, 123, 255, 0.3);
+      color: var(--violet);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-hoje-badge:hover {
+      background: var(--violet);
+      color: #fff;
+    }
+
+    /* Caixa explicativa de transporte de saldo */
+    .saldo-transportado-box {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr;
+      align-items: center;
+      background: rgba(22, 33, 63, 0.6);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 8px 6px;
+      margin-bottom: 14px;
+      gap: 2px;
+      text-align: center;
+    }
+    .saldo-item-col {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .saldo-item-col .st-lbl {
+      font-size: 9px;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    .saldo-item-col .st-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--ink);
+      white-space: nowrap;
+    }
+    .saldo-item-col .st-val.highlight {
+      color: var(--violet);
+    }
+    .saldo-sep-col {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    /* Botões rápidos de data */
+    .date-chip-btn {
+      background: var(--surface2);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .date-chip-btn:hover {
+      color: var(--ink);
+      border-color: var(--violet);
+    }
   </style>
 </head>
 <body>
@@ -867,8 +979,9 @@
         <span>🚗</span> Meu Controle
         <span class="brand-badge">Motorista</span>
       </div>
-      <div class="status-pill">
-        <span class="status-dot"></span> Online
+      <div class="status-pill" title="Sincronizado com horário oficial de Brasília">
+        <span class="status-dot"></span>
+        <span id="clock-brasilia">Brasília</span>
       </div>
     </div>
 
@@ -883,12 +996,43 @@
       <header class="hero">
         <div class="month-row">
           <button class="month-nav-btn" onclick="changeMonth(-1)" aria-label="Mês anterior">‹</button>
-          <div class="month-label" id="lbl-mes-ano">Setembro de 2026</div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 3px;">
+            <div class="month-label" id="lbl-mes-ano">--</div>
+            <button id="btn-voltar-mes-atual" class="btn-hoje-badge" onclick="irParaMesAtual()" style="display: none;" title="Voltar ao mês atual">Mês Atual ↩</button>
+          </div>
           <button class="month-nav-btn" onclick="changeMonth(1)" aria-label="Próximo mês">›</button>
         </div>
 
-        <div class="saldo-label">Sobra do mês (Lucro Líquido)</div>
+        <!-- Seletor de Modo: Sobra Líquida do Mês vs Saldo Total em Caixa -->
+        <div class="saldo-mode-selector">
+          <button id="btn-modo-sobra" class="saldo-mode-btn active" onclick="setModoSaldo('sobra')">
+            Sobra do Mês
+          </button>
+          <button id="btn-modo-caixa" class="saldo-mode-btn" onclick="setModoSaldo('caixa')">
+            Saldo Total em Caixa
+          </button>
+        </div>
+
+        <div class="saldo-label" id="lbl-saldo-hero">Sobra Líquida do Mês</div>
         <div class="saldo-value" id="val-sobra">R$ 0,00</div>
+
+        <!-- Matemática transparente de transporte de saldo -->
+        <div class="saldo-transportado-box">
+          <div class="saldo-item-col">
+            <span class="st-lbl">Sobra deste mês</span>
+            <span class="st-val" id="val-sobra-mes">R$ 0,00</span>
+          </div>
+          <div class="saldo-sep-col">+</div>
+          <div class="saldo-item-col">
+            <span class="st-lbl">Vindo anterior</span>
+            <span class="st-val" id="val-saldo-anterior">R$ 0,00</span>
+          </div>
+          <div class="saldo-sep-col">=</div>
+          <div class="saldo-item-col">
+            <span class="st-lbl">Total caixa</span>
+            <span class="st-val highlight" id="val-saldo-total-caixa">R$ 0,00</span>
+          </div>
+        </div>
 
         <div class="mini-row">
           <div class="mini in">
@@ -905,10 +1049,12 @@
           <div class="kpi-card">
             <div class="l">⏱ Horas no Mês</div>
             <div class="v" id="val-horas-total">0.0h</div>
+            <div id="val-horas-media" style="font-size: 10px; color: var(--muted); font-family: 'JetBrains Mono', monospace; margin-top: 2px;">--</div>
           </div>
           <div class="kpi-card" style="cursor: pointer;" onclick="trocarAba('metas')" title="Ver Metas e Ritmo">
             <div class="l">🎯 Meta Diária ↗</div>
             <div class="v" id="val-status-meta-home" style="color: var(--amber);">Ver ritmo</div>
+            <div id="val-status-meta-sub" style="font-size: 10px; color: var(--muted); margin-top: 2px;">Hoje em Brasília</div>
           </div>
         </div>
 
@@ -992,6 +1138,10 @@
         </select>
 
         <label for="form-data">Data</label>
+        <div style="display: flex; gap: 6px; margin-bottom: 8px;">
+          <button type="button" class="date-chip-btn" onclick="preencherDataRapida('hoje')">📅 Hoje (Brasília)</button>
+          <button type="button" class="date-chip-btn" onclick="preencherDataRapida('ontem')">⏳ Ontem</button>
+        </div>
         <input type="date" id="form-data">
 
         <label for="form-desc">Descrição / Nota (opcional)</label>
@@ -1029,6 +1179,7 @@
           <div>
             <span style="font-size: 11px; color: var(--muted); text-transform: uppercase;">Faturado Hoje</span>
             <div id="meta-faturado-hoje" class="mono" style="font-size: 24px; font-weight: 700; color: var(--cyan);">R$ 0,00</div>
+            <div id="meta-horas-hoje" style="font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; margin-top: 2px;">⏱ 0.0h hoje</div>
           </div>
           <div style="text-align: right;">
             <span style="font-size: 11px; color: var(--muted); text-transform: uppercase;">Meta do Dia</span>
@@ -1282,12 +1433,133 @@
       "Trabalhe duro hoje para trocar o posto de combustível pela tomada do seu carro elétrico amanhã!"
     ];
 
+    // --- UTILITÁRIOS DE FUSO HORÁRIO DE BRASÍLIA (AMERICA/SAO_PAULO) ---
+    function getBrasiliaInfo(data = new Date()) {
+      const dtf = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'America/Sao_Paulo',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      });
+      const parts = Object.fromEntries(dtf.formatToParts(data).map(p => [p.type, p.value]));
+      return {
+        ano: parseInt(parts.year, 10),
+        mes: parseInt(parts.month, 10) - 1, // 0 a 11
+        dia: parseInt(parts.day, 10),
+        hora: parseInt(parts.hour, 10),
+        minuto: parseInt(parts.minute, 10),
+        segundo: parseInt(parts.second, 10),
+        isoDate: `${parts.year}-${parts.month}-${parts.day}`
+      };
+    }
+
+    function getHojeBrasilia() {
+      return getBrasiliaInfo().isoDate;
+    }
+
+    function getOntemBrasilia() {
+      const agora = new Date();
+      const ontem = new Date(agora.getTime() - 24 * 60 * 60 * 1000);
+      return getBrasiliaInfo(ontem).isoDate;
+    }
+
+    function getMesAnoBrasilia() {
+      const info = getBrasiliaInfo();
+      return { mes: info.mes, ano: info.ano, dia: info.dia };
+    }
+
+    function formatarDataHoraBrasilia(data = new Date()) {
+      const formatadorData = new Intl.DateTimeFormat('pt-BR', {
+        timeZone: 'America/Sao_Paulo',
+        weekday: 'short',
+        day: '2-digit',
+        month: '2-digit'
+      });
+      const formatadorHora = new Intl.DateTimeFormat('pt-BR', {
+        timeZone: 'America/Sao_Paulo',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+      const dataTxt = formatadorData.format(data).replace('.', '');
+      const horaTxt = formatadorHora.format(data);
+      return `${dataTxt} • ${horaTxt}`;
+    }
+
+    function atualizarRelogioBrasilia() {
+      const elClock = document.getElementById('clock-brasilia');
+      if (elClock) {
+        elClock.textContent = `Brasília: ${formatarDataHoraBrasilia()}`;
+      }
+    }
+
+    let relogioInterval = null;
+    function iniciarRelogioBrasilia() {
+      atualizarRelogioBrasilia();
+      if (relogioInterval) clearInterval(relogioInterval);
+      relogioInterval = setInterval(atualizarRelogioBrasilia, 1000);
+    }
+
+    function formatarDataItem(dataIso) {
+      if (!dataIso) return '--/--';
+      const hoje = getHojeBrasilia();
+      const ontem = getOntemBrasilia();
+      const [ano, mes, dia] = dataIso.split('-').map(Number);
+      if (!ano || !mes || !dia) return dataIso;
+      const diaMes = `${String(dia).padStart(2, '0')}/${String(mes).padStart(2, '0')}`;
+
+      if (dataIso === hoje) return `Hoje (${diaMes})`;
+      if (dataIso === ontem) return `Ontem (${diaMes})`;
+
+      const d = new Date(Date.UTC(ano, mes - 1, dia, 12, 0, 0));
+      const diaSemana = new Intl.DateTimeFormat('pt-BR', {
+        timeZone: 'America/Sao_Paulo',
+        weekday: 'short'
+      }).format(d).replace('.', '');
+      return `${diaSemana}, ${diaMes}`;
+    }
+
+    function preencherDataRapida(tipo) {
+      const input = document.getElementById('form-data');
+      if (!input) return;
+      if (tipo === 'hoje') {
+        input.value = getHojeBrasilia();
+      } else if (tipo === 'ontem') {
+        input.value = getOntemBrasilia();
+      }
+    }
+
     // --- ESTADO GLOBAL & PERSISTÊNCIA ---
-    let mesAtual = new Date().getMonth();
-    let anoAtual = new Date().getFullYear();
+    const dadosDataBr = getMesAnoBrasilia();
+    let mesAtual = dadosDataBr.mes;
+    let anoAtual = dadosDataBr.ano;
     let tipoAtual = 'in'; // 'in' ou 'out'
+    let modoSaldo = localStorage.getItem('meucontrole_modo_saldo') || 'sobra'; // 'sobra' ou 'caixa'
     let meuGraficoCategorias = null; // Instância ativa do Chart.js (Categorias)
     let meuGraficoEvolucao = null;   // Instância ativa do Chart.js (Evolução 6 meses)
+
+    function setModoSaldo(modo) {
+      modoSaldo = modo;
+      try { localStorage.setItem('meucontrole_modo_saldo', modo); } catch (e) {}
+      const btnSobra = document.getElementById('btn-modo-sobra');
+      const btnCaixa = document.getElementById('btn-modo-caixa');
+      if (btnSobra) btnSobra.classList.toggle('active', modo === 'sobra');
+      if (btnCaixa) btnCaixa.classList.toggle('active', modo === 'caixa');
+      atualizarResumo();
+    }
+
+    function irParaMesAtual() {
+      const info = getMesAnoBrasilia();
+      mesAtual = info.mes;
+      anoAtual = info.ano;
+      atualizarResumo();
+      atualizarGraficos();
+      renderizarHistorico();
+    }
 
     const NOMES_MESES = [
       'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -1316,12 +1588,17 @@
           return [];
         }
       } else {
-        const hojeIso = new Date().toISOString().split('T')[0];
+        const hojeIso = getHojeBrasilia();
         
-        function mesPassadoIso(mesesAtras) {
-          const d = new Date();
-          d.setMonth(d.getMonth() - mesesAtras);
-          return d.toISOString().split('T')[0];
+        function mesPassadoIso(mesesAtras, diaFixado = 15) {
+          const info = getBrasiliaInfo();
+          let m = info.mes - mesesAtras;
+          let a = info.ano;
+          while (m < 0) {
+            m += 12;
+            a -= 1;
+          }
+          return `${a}-${String(m + 1).padStart(2, '0')}-${String(diaFixado).padStart(2, '0')}`;
         }
 
         const dadosIniciais = [
@@ -1382,7 +1659,7 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // --- TROCA DE MÊS ---
+    // --- TROCA DE MÊS COM ATUALIZAÇÃO INTEGRAL ---
     function changeMonth(delta) {
       mesAtual += delta;
       if (mesAtual < 0) {
@@ -1394,6 +1671,7 @@
       }
       atualizarResumo();
       atualizarGraficos();
+      renderizarHistorico();
     }
 
     // --- TIPO E CATEGORIA ---
@@ -1554,6 +1832,16 @@
       // Limpar campo do agente
       campoTexto.value = '';
 
+      // Detecta se o usuário mencionou ontem ou hoje para ajustar a data
+      const inputDataForm = document.getElementById('form-data');
+      if (inputDataForm) {
+        if (textoLimpo.includes('ontem')) {
+          inputDataForm.value = getOntemBrasilia();
+        } else {
+          inputDataForm.value = getHojeBrasilia();
+        }
+      }
+
       // Feedback toast
       const toast = document.getElementById('toast-banner');
       const toastMsg = document.getElementById('toast-msg');
@@ -1582,6 +1870,8 @@
         return;
       }
 
+      const dataLancamento = (inputData && inputData.value) ? inputData.value : getHojeBrasilia();
+
       const novoItem = {
         id: Date.now().toString(),
         tipo: tipoAtual,
@@ -1589,20 +1879,30 @@
         horas: parseFloat(inputHoras.value) || 0,
         categoria: selectCat.value || 'Corrida/Trabalho',
         desc: inputDesc.value.trim() || selectCat.value,
-        data: inputData.value || new Date().toISOString().split('T')[0]
+        data: dataLancamento
       };
 
       lancamentos.unshift(novoItem);
       salvarDados();
 
-      // Limpa formulário
+      // Sincroniza a tela para exibir o mês e ano do lançamento salvo
+      const [anoItem, mesItem] = dataLancamento.split('-').map(Number);
+      if (anoItem && mesItem) {
+        anoAtual = anoItem;
+        mesAtual = mesItem - 1;
+      }
+
+      // Limpa formulário e restaura a data para hoje em Brasília
       inputValor.value = '';
       inputHoras.value = '';
       inputDesc.value = '';
+      if (inputData) inputData.value = getHojeBrasilia();
 
       alert('Lançamento salvo com sucesso!');
       atualizarResumo();
+      atualizarMetas();
       atualizarGraficos();
+      renderizarHistorico();
       trocarAba('resumo');
     }
 
@@ -1612,54 +1912,129 @@
         lancamentos = lancamentos.filter(item => item.id !== id);
         salvarDados();
         atualizarResumo();
+        atualizarMetas();
         atualizarGraficos();
         renderizarHistorico();
       }
     }
 
-    // --- ATUALIZAR RESUMO & CÁLCULOS ---
+    // --- ATUALIZAR RESUMO & CÁLCULOS (COM TRANSPORTE DE SALDO ENTRE MESES) ---
     function atualizarResumo() {
+      const infoHoje = getMesAnoBrasilia();
       const lblMes = document.getElementById('lbl-mes-ano');
       if (lblMes) {
         lblMes.textContent = `${NOMES_MESES[mesAtual]} de ${anoAtual}`;
       }
 
-      const itensDoMes = lancamentos.filter(item => {
-        if (!item.data) return false;
-        const [ano, mes] = item.data.split('-').map(Number);
-        return ano === anoAtual && (mes - 1) === mesAtual;
-      });
+      // Exibe botão para retornar ao mês atual se estiver navegando em outro mês
+      const btnVoltar = document.getElementById('btn-voltar-mes-atual');
+      if (btnVoltar) {
+        const estaNoMesAtual = (mesAtual === infoHoje.mes && anoAtual === infoHoje.ano);
+        btnVoltar.style.display = estaNoMesAtual ? 'none' : 'inline-block';
+      }
 
+      // 1. Separa lançamentos anteriores e do mês selecionado
+      let saldoAnterior = 0;
       let totalFaturou = 0;
       let totalGastou = 0;
       let totalHoras = 0;
+      const itensDoMes = [];
 
-      itensDoMes.forEach(item => {
-        if (item.tipo === 'in') {
-          totalFaturou += Number(item.valor) || 0;
-          totalHoras += Number(item.horas) || 0;
-        } else {
-          totalGastou += Number(item.valor) || 0;
+      lancamentos.forEach(item => {
+        if (!item.data) return;
+        const [ano, mes] = item.data.split('-').map(Number);
+        if (!ano || !mes) return;
+        const mesIndex = mes - 1;
+        const v = Number(item.valor) || 0;
+        const h = Number(item.horas) || 0;
+
+        if (ano < anoAtual || (ano === anoAtual && mesIndex < mesAtual)) {
+          // Lançamentos estritamente de meses anteriores (Transporte de Saldo)
+          if (item.tipo === 'in') {
+            saldoAnterior += v;
+          } else {
+            saldoAnterior -= v;
+          }
+        } else if (ano === anoAtual && mesIndex === mesAtual) {
+          // Lançamentos deste mês
+          itensDoMes.push(item);
+          if (item.tipo === 'in') {
+            totalFaturou += v;
+            totalHoras += h;
+          } else {
+            totalGastou += v;
+          }
         }
       });
 
-      const sobra = totalFaturou - totalGastou;
+      const sobraMes = totalFaturou - totalGastou;
+      const saldoTotalCaixa = saldoAnterior + sobraMes;
 
+      // Elementos do DOM
       const elSobra = document.getElementById('val-sobra');
+      const lblSaldoHero = document.getElementById('lbl-saldo-hero');
+      const elSobraMes = document.getElementById('val-sobra-mes');
+      const elSaldoAnterior = document.getElementById('val-saldo-anterior');
+      const elSaldoTotalCaixa = document.getElementById('val-saldo-total-caixa');
       const elFaturou = document.getElementById('val-faturou');
       const elGastou = document.getElementById('val-gastou');
       const elHoras = document.getElementById('val-horas-total');
+      const elHorasMedia = document.getElementById('val-horas-media');
 
       if (elFaturou) elFaturou.textContent = formatarMoeda(totalFaturou);
       if (elGastou) elGastou.textContent = formatarMoeda(totalGastou);
       if (elHoras) elHoras.textContent = totalHoras.toFixed(1) + 'h';
-
-      if (elSobra) {
-        elSobra.textContent = formatarMoeda(sobra);
-        if (sobra < 0) {
-          elSobra.classList.add('neg');
+      if (elHorasMedia) {
+        if (totalHoras > 0) {
+          const media = totalFaturou / totalHoras;
+          elHorasMedia.textContent = `Média: ${formatarMoeda(media)}/h`;
         } else {
-          elSobra.classList.remove('neg');
+          elHorasMedia.textContent = totalFaturou > 0 ? 'Sem horas registradas' : '--';
+        }
+      }
+
+      // Detalhes da matemática de transporte
+      if (elSobraMes) {
+        const prefixoSobra = sobraMes > 0 ? '+ ' : '';
+        elSobraMes.textContent = `${prefixoSobra}${formatarMoeda(sobraMes)}`;
+        elSobraMes.style.color = sobraMes >= 0 ? 'var(--cyan)' : 'var(--coral)';
+      }
+
+      if (elSaldoAnterior) {
+        elSaldoAnterior.textContent = formatarMoeda(saldoAnterior);
+        elSaldoAnterior.style.color = saldoAnterior >= 0 ? 'var(--ink)' : 'var(--coral)';
+      }
+
+      if (elSaldoTotalCaixa) {
+        elSaldoTotalCaixa.textContent = formatarMoeda(saldoTotalCaixa);
+        elSaldoTotalCaixa.style.color = saldoTotalCaixa >= 0 ? 'var(--violet)' : 'var(--coral)';
+      }
+
+      // Atualiza o Número Principal conforme o modo selecionado
+      if (modoSaldo === 'sobra') {
+        if (lblSaldoHero) {
+          lblSaldoHero.textContent = `Sobra Líquida de ${NOMES_MESES[mesAtual]}`;
+        }
+        if (elSobra) {
+          const prefix = sobraMes > 0 ? '+ ' : '';
+          elSobra.textContent = `${prefix}${formatarMoeda(sobraMes)}`;
+          if (sobraMes < 0) {
+            elSobra.classList.add('neg');
+          } else {
+            elSobra.classList.remove('neg');
+          }
+        }
+      } else {
+        if (lblSaldoHero) {
+          lblSaldoHero.textContent = `Saldo Total em Caixa (Acumulado)`;
+        }
+        if (elSobra) {
+          elSobra.textContent = formatarMoeda(saldoTotalCaixa);
+          if (saldoTotalCaixa < 0) {
+            elSobra.classList.add('neg');
+          } else {
+            elSobra.classList.remove('neg');
+          }
         }
       }
 
@@ -1682,8 +2057,8 @@
         barDivida.title = `${percPago}% quitado (${formatarMoeda(totalAbatidoDivida)})`;
       }
 
-      // Status da Meta Diária na Home
-      const hojeIso = new Date().toISOString().split('T')[0];
+      // Status da Meta Diária na Home (Usa fuso horário oficial de Brasília)
+      const hojeIso = getHojeBrasilia();
       const faturadoHoje = lancamentos
         .filter(item => item.tipo === 'in' && item.data === hojeIso)
         .reduce((sum, item) => sum + (Number(item.valor) || 0), 0);
@@ -1702,7 +2077,7 @@
       if (listaUltimos) {
         const ultimos = itensDoMes.slice(0, 4);
         if (ultimos.length === 0) {
-          listaUltimos.innerHTML = '<div class="empty-state">Nenhum lançamento registrado neste mês. Digite no agente ou use a aba Lançar!</div>';
+          listaUltimos.innerHTML = `<div class="empty-state">Nenhum lançamento registrado em ${NOMES_MESES[mesAtual]} de ${anoAtual}. Digite no agente ou use a aba Lançar!</div>`;
         } else {
           listaUltimos.innerHTML = ultimos.map(item => criarLinhaItemHtml(item)).join('');
         }
@@ -1735,23 +2110,32 @@
       // 1. Sorteia uma frase de motivação
       sortearNovaFrase();
 
-      // 2. Calcula Faturamento de Hoje
-      const hojeIso = new Date().toISOString().split('T')[0];
-      const faturadoHoje = lancamentos
-        .filter(item => item.tipo === 'in' && item.data === hojeIso)
-        .reduce((sum, item) => sum + (Number(item.valor) || 0), 0);
+      // 2. Calcula Faturamento e Horas de Hoje usando Horário de Brasília
+      const hojeIso = getHojeBrasilia();
+      const lancamentosHoje = lancamentos.filter(item => item.data === hojeIso && item.tipo === 'in');
+      const faturadoHoje = lancamentosHoje.reduce((sum, item) => sum + (Number(item.valor) || 0), 0);
+      const horasHoje = lancamentosHoje.reduce((sum, item) => sum + (Number(item.horas) || 0), 0);
 
       const metaAlvo = Number(config.metaDiaria) || 300;
       const porcentagem = Math.min(100, Math.round((faturadoHoje / metaAlvo) * 100)) || 0;
       const restante = Math.max(0, metaAlvo - faturadoHoje);
 
       const elFaturadoHoje = document.getElementById('meta-faturado-hoje');
+      const elHorasHoje = document.getElementById('meta-horas-hoje');
       const elMetaAlvo = document.getElementById('meta-valor-alvo');
       const elBarFill = document.getElementById('meta-bar-fill');
       const elPctHoje = document.getElementById('meta-porcentagem-hoje');
       const elRestanteHoje = document.getElementById('meta-restante-hoje');
 
       if (elFaturadoHoje) elFaturadoHoje.textContent = formatarMoeda(faturadoHoje);
+      if (elHorasHoje) {
+        if (horasHoje > 0) {
+          const mediaHoje = faturadoHoje / horasHoje;
+          elHorasHoje.textContent = `⏱ ${horasHoje.toFixed(1)}h hoje • ${formatarMoeda(mediaHoje)}/h`;
+        } else {
+          elHorasHoje.textContent = faturadoHoje > 0 ? '⏱ Horas não informadas' : '⏱ 0.0h hoje';
+        }
+      }
       if (elMetaAlvo) elMetaAlvo.textContent = formatarMoeda(metaAlvo);
       if (elBarFill) elBarFill.style.width = porcentagem + '%';
       if (elPctHoje) elPctHoje.textContent = `${porcentagem}% da meta atingida`;
@@ -2197,7 +2581,7 @@
       });
 
       const conteudoCSV = '\uFEFF' + linhas.join('\r\n');
-      const dataHoje = new Date().toISOString().split('T')[0];
+      const dataHoje = getHojeBrasilia();
       const nomeArquivo = `meucontrole_backup_${dataHoje}.csv`;
       const blob = new Blob([conteudoCSV], { type: 'text/csv;charset=utf-8;' });
 
@@ -2294,7 +2678,7 @@
             const categoria = (idxCat !== -1 ? cols[idxCat] : cols[2]) || 'Corrida/Trabalho';
             const horas = parseFloat(idxHoras !== -1 ? cols[idxHoras] : (cols[4] || 0)) || 0;
             const desc = (idxDesc !== -1 ? cols[idxDesc] : (cols[5] || categoria)) || categoria;
-            const data = (idxData !== -1 ? cols[idxData] : (cols[6] || new Date().toISOString().split('T')[0])) || new Date().toISOString().split('T')[0];
+            const data = (idxData !== -1 ? cols[idxData] : (cols[6] || getHojeBrasilia())) || getHojeBrasilia();
             const id = (idxId !== -1 && cols[idxId]) ? cols[idxId] : (Date.now() + i).toString();
 
             novosLancamentos.push({
@@ -2339,9 +2723,13 @@
 
     // --- INICIALIZAÇÃO AO CARREGAR ---
     window.addEventListener('DOMContentLoaded', () => {
+      // Inicia o relógio sincronizado com fuso horário oficial de Brasília
+      iniciarRelogioBrasilia();
+
+      // Inicializa campo de data com a data atual oficial de Brasília
       const inputData = document.getElementById('form-data');
       if (inputData) {
-        inputData.value = new Date().toISOString().split('T')[0];
+        inputData.value = getHojeBrasilia();
       }
 
       const txtAgente = document.getElementById('txt-agente');
@@ -2355,6 +2743,7 @@
       }
 
       atualizarResumo();
+      atualizarMetas();
       atualizarGraficos();
     });
   </script>
