@@ -969,6 +969,104 @@
       color: var(--ink);
       border-color: var(--violet);
     }
+
+    /* Tabela e Editor de Evolução 6 Meses */
+    .btn-edit-sec {
+      background: var(--surface2);
+      border: 1px solid var(--line);
+      color: var(--cyan);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s;
+    }
+    .btn-edit-sec:hover {
+      border-color: var(--cyan);
+      background: var(--cyan-soft);
+    }
+    .tabela-evolucao {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 6px;
+      font-size: 11px;
+    }
+    .tabela-evolucao th {
+      text-align: left;
+      color: var(--muted);
+      font-size: 10px;
+      text-transform: uppercase;
+      padding: 6px 4px;
+      border-bottom: 1px solid var(--line);
+      font-weight: 600;
+    }
+    .tabela-evolucao td {
+      padding: 8px 4px;
+      border-bottom: 1px solid rgba(34, 48, 79, 0.45);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+    }
+    .tabela-evolucao tr:last-child td {
+      border-bottom: none;
+    }
+    .tabela-evolucao .btn-row-edit {
+      background: var(--surface2);
+      border: 1px solid var(--line);
+      color: var(--cyan);
+      font-family: inherit;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 6px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .tabela-evolucao .btn-row-edit:hover {
+      background: var(--cyan-soft);
+      border-color: var(--cyan);
+    }
+    .editor-evolucao-box {
+      background: rgba(22, 33, 63, 0.7);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 12px;
+      margin-top: 14px;
+      display: none;
+    }
+    .editor-mes-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 10px;
+      margin-bottom: 8px;
+    }
+    .editor-mes-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--ink);
+    }
+    .editor-mes-inputs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .editor-mes-inputs label {
+      font-size: 10px;
+      margin-bottom: 3px;
+    }
+    .editor-mes-inputs input {
+      margin-bottom: 0;
+      padding: 8px 10px;
+      font-size: 12px;
+    }
   </style>
 </head>
 <body>
@@ -1309,7 +1407,9 @@
       <div class="card">
         <div class="card-header">
           <h2>📈 Evolução (Últimos 6 Meses)</h2>
-          <span style="font-size: 11px; color: var(--muted);">Faturou vs. Gastou</span>
+          <button class="btn-edit-sec" id="btn-toggle-editor-evolucao" onclick="alternarEditorEvolucao()">
+            ✏️ Editar Meses
+          </button>
         </div>
 
         <div class="chart-container-box" style="min-height: 240px;">
@@ -1323,6 +1423,34 @@
           <span style="display: flex; align-items: center; gap: 6px; color: var(--coral);">
             <span style="width: 10px; height: 10px; border-radius: 2px; background: var(--coral); display: inline-block;"></span> Despesas
           </span>
+        </div>
+
+        <!-- Painel de Edição dos 6 Meses -->
+        <div id="editor-evolucao-box" class="editor-evolucao-box">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <strong style="font-size: 12px; color: var(--ink);">Ajustar Faturamento e Gastos dos Meses</strong>
+            <button class="btn-edit-sec" onclick="alternarEditorEvolucao()">✕ Fechar</button>
+          </div>
+          <p style="font-size: 11px; color: var(--muted); margin-bottom: 12px;">
+            Edite os totais de cada um dos últimos 6 meses para refletir seus ganhos e despesas reais.
+          </p>
+          <div id="editor-meses-lista">
+            <!-- Renderizado dinamicamente via JS -->
+          </div>
+          <button class="btn-submit" style="margin-top: 12px; padding: 11px; font-size: 13px;" onclick="salvarTodosMesesEvolucao()">
+            💾 Salvar Todos os Meses
+          </button>
+        </div>
+
+        <!-- Tabela Resumo dos 6 Meses com Edição Rápida -->
+        <div style="margin-top: 16px; border-top: 1px solid var(--line); padding-top: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <span style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--muted); letter-spacing: 0.03em;">Resumo dos 6 Meses</span>
+            <span style="font-size: 10px; color: var(--cyan); cursor: pointer;" onclick="alternarEditorEvolucao()">Editar valores ✏️</span>
+          </div>
+          <div id="tabela-evolucao-container">
+            <!-- Renderizado via JS -->
+          </div>
         </div>
       </div>
     </div>
@@ -2457,6 +2585,230 @@
           }
         }
       });
+
+      // Renderiza a tabela interativa com os dados dos 6 meses
+      renderizarTabelaEvolucao(mesesChave, labelsMeses, faturamentoPorMes, gastosPorMes);
+    }
+
+    // --- FUNÇÕES DE EDIÇÃO DA ABA EVOLUÇÃO (6 MESES) ---
+    function renderizarTabelaEvolucao(mesesChave, labelsMeses, faturamentoPorMes, gastosPorMes) {
+      const container = document.getElementById('tabela-evolucao-container');
+      if (!container) return;
+
+      let html = `
+        <table class="tabela-evolucao">
+          <thead>
+            <tr>
+              <th>Mês</th>
+              <th>Faturou</th>
+              <th>Gastou</th>
+              <th>Sobra</th>
+              <th style="text-align: right;">Ação</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      for (let i = 0; i < mesesChave.length; i++) {
+        const chave = mesesChave[i];
+        const label = labelsMeses[i];
+        const fat = faturamentoPorMes[i];
+        const gas = gastosPorMes[i];
+        const sobra = fat - gas;
+        const corSobra = sobra >= 0 ? 'var(--cyan)' : 'var(--coral)';
+        const prefixoSobra = sobra > 0 ? '+' : '';
+
+        html += `
+          <tr>
+            <td style="font-family: inherit; font-weight: 700; color: var(--ink);">${label}</td>
+            <td style="color: var(--cyan);">${formatarMoeda(fat)}</td>
+            <td style="color: var(--coral);">${formatarMoeda(gas)}</td>
+            <td style="color: ${corSobra}; font-weight: 700;">${prefixoSobra}${formatarMoeda(sobra)}</td>
+            <td style="text-align: right;">
+              <button class="btn-row-edit" onclick="editarMesRapido('${chave}', '${label}', ${fat}, ${gas})">
+                ✏️ Editar
+              </button>
+            </td>
+          </tr>
+        `;
+      }
+
+      html += `
+          </tbody>
+        </table>
+      `;
+
+      container.innerHTML = html;
+    }
+
+    function editarMesRapido(chaveMes, labelMes, faturouAtual, gastouAtual) {
+      const novoFat = prompt(`[${labelMes}] Digite o Faturamento Total (R$):`, faturouAtual);
+      if (novoFat === null) return;
+      const novoGas = prompt(`[${labelMes}] Digite os Gastos Totais (R$):`, gastouAtual);
+      if (novoGas === null) return;
+
+      const numFat = parseFloat(novoFat.replace(',', '.'));
+      const numGas = parseFloat(novoGas.replace(',', '.'));
+
+      if (isNaN(numFat) || isNaN(numGas) || numFat < 0 || numGas < 0) {
+        alert('Por favor, informe valores numéricos válidos (iguais ou maiores que zero).');
+        return;
+      }
+
+      salvarValoresMesEvolucao(chaveMes, numFat, numGas);
+      alert(`Valores de ${labelMes} atualizados com sucesso!`);
+    }
+
+    function alternarEditorEvolucao() {
+      const box = document.getElementById('editor-evolucao-box');
+      if (!box) return;
+
+      const estaAberto = box.style.display === 'block';
+      if (estaAberto) {
+        box.style.display = 'none';
+      } else {
+        montarFormularioEditorEvolucao();
+        box.style.display = 'block';
+        box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+
+    function montarFormularioEditorEvolucao() {
+      const listaContainer = document.getElementById('editor-meses-lista');
+      if (!listaContainer) return;
+
+      const mesesChave = [];
+      const labelsMeses = [];
+
+      for (let i = 5; i >= 0; i--) {
+        const d = new Date(anoAtual, mesAtual - i, 1);
+        const m = d.getMonth();
+        const y = d.getFullYear();
+        const chave = `${y}-${String(m + 1).padStart(2, '0')}`;
+        mesesChave.push(chave);
+        labelsMeses.push(`${NOMES_MESES[m]} de ${y}`);
+      }
+
+      const faturamentoPorMes = mesesChave.map(() => 0);
+      const gastosPorMes = mesesChave.map(() => 0);
+
+      lancamentos.forEach(item => {
+        if (!item.data) return;
+        const prefixoMes = item.data.slice(0, 7);
+        const idx = mesesChave.indexOf(prefixoMes);
+        if (idx !== -1) {
+          const v = Number(item.valor) || 0;
+          if (item.tipo === 'in') {
+            faturamentoPorMes[idx] += v;
+          } else {
+            gastosPorMes[idx] += v;
+          }
+        }
+      });
+
+      let html = '';
+      for (let i = 0; i < mesesChave.length; i++) {
+        const chave = mesesChave[i];
+        const label = labelsMeses[i];
+        const fat = faturamentoPorMes[i];
+        const gas = gastosPorMes[i];
+        const sobra = fat - gas;
+        const corSobra = sobra >= 0 ? 'var(--cyan)' : 'var(--coral)';
+
+        html += `
+          <div class="editor-mes-card" data-chave="${chave}">
+            <div class="editor-mes-header">
+              <span>📅 ${label}</span>
+              <span style="color: ${corSobra}; font-family: 'JetBrains Mono', monospace; font-size: 11px;">
+                Sobra: ${sobra >= 0 ? '+' : ''}${formatarMoeda(sobra)}
+              </span>
+            </div>
+            <div class="editor-mes-inputs">
+              <div>
+                <label>Faturou (R$)</label>
+                <input type="number" step="10" min="0" id="input-fat-${chave}" value="${fat}">
+              </div>
+              <div>
+                <label>Gastou (R$)</label>
+                <input type="number" step="10" min="0" id="input-gas-${chave}" value="${gas}">
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      listaContainer.innerHTML = html;
+    }
+
+    function salvarTodosMesesEvolucao() {
+      const cards = document.querySelectorAll('.editor-mes-card');
+      if (!cards || cards.length === 0) return;
+
+      cards.forEach(card => {
+        const chave = card.getAttribute('data-chave');
+        const inputFat = document.getElementById(`input-fat-${chave}`);
+        const inputGas = document.getElementById(`input-gas-${chave}`);
+        if (!inputFat || !inputGas) return;
+
+        const fat = Math.max(0, parseFloat(inputFat.value) || 0);
+        const gas = Math.max(0, parseFloat(inputGas.value) || 0);
+
+        salvarValoresMesEvolucaoSemRefresh(chave, fat, gas);
+      });
+
+      salvarDados();
+      atualizarGraficos();
+      atualizarResumo();
+      atualizarMetas();
+      renderizarHistorico();
+
+      const box = document.getElementById('editor-evolucao-box');
+      if (box) box.style.display = 'none';
+
+      alert('Histórico dos 6 meses atualizado com sucesso! Os gráficos e saldos foram recalculados.');
+    }
+
+    function salvarValoresMesEvolucaoSemRefresh(chaveMes, novoFaturou, novoGastou) {
+      // Remove lançamentos antigos desse mês específico
+      lancamentos = lancamentos.filter(item => {
+        if (!item.data) return true;
+        return item.data.slice(0, 7) !== chaveMes;
+      });
+
+      const diaPadrao = `${chaveMes}-15`;
+
+      if (novoFaturou > 0) {
+        lancamentos.push({
+          id: Date.now().toString() + '-fat-' + Math.random().toString(36).slice(2, 6),
+          tipo: 'in',
+          valor: novoFaturou,
+          horas: Math.round(novoFaturou / 25) || 0,
+          categoria: 'Corrida/Trabalho',
+          desc: 'Uber + 99 faturamento mensal consolidado',
+          data: diaPadrao
+        });
+      }
+
+      if (novoGastou > 0) {
+        lancamentos.push({
+          id: Date.now().toString() + '-gas-' + Math.random().toString(36).slice(2, 6),
+          tipo: 'out',
+          valor: novoGastou,
+          horas: 0,
+          categoria: 'Combustível',
+          desc: 'Gastos consolidados do mês',
+          data: diaPadrao
+        });
+      }
+    }
+
+    function salvarValoresMesEvolucao(chaveMes, novoFaturou, novoGastou) {
+      salvarValoresMesEvolucaoSemRefresh(chaveMes, novoFaturou, novoGastou);
+      salvarDados();
+      atualizarGraficos();
+      atualizarResumo();
+      atualizarMetas();
+      renderizarHistorico();
     }
 
     // --- HTML DE ITEM DA LISTA ---
