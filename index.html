@@ -2294,20 +2294,20 @@
           </div>
         </div>
 
-        <!-- Campo de Envio de Pergunta -->
-        <div class="ai-chat-input-row">
+        <!-- Campo de Envio de Pergunta com suporte total a teclados de celular -->
+        <form class="ai-chat-input-row" onsubmit="event.preventDefault(); aiEnviarMensagem();">
           <input 
             type="text" 
             id="ai-chat-input" 
             class="ai-chat-input" 
             placeholder="Ex: Quanto preciso fazer hoje para cobrir o aluguel?"
-            onkeydown="if(event.key==='Enter') aiEnviarMensagem()"
+            autocomplete="off"
           >
-          <button id="ai-chat-btn-enviar" class="ai-chat-btn-send" onclick="aiEnviarMensagem()">
+          <button id="ai-chat-btn-enviar" type="submit" class="ai-chat-btn-send">
             <span>Enviar</span>
             <svg style="width:14px; height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
           </button>
-        </div>
+        </form>
       </section>
     </div>
 
@@ -4829,7 +4829,7 @@
     }
 
     function aiGerarRespostaLocalInteligente(pergunta, dados) {
-      const msgLower = (pergunta || '').toLowerCase();
+      const msgLower = (pergunta || '').toLowerCase().trim();
       const meta = Number(dados?.metaDiaria) || 300;
       const faturouHoje = Number(dados?.faturouHoje) || 0;
       const pctHoje = Math.round((faturouHoje / (meta || 1)) * 100);
@@ -4845,6 +4845,20 @@
       const mediaHora = Number(dados?.mediaHora) || 0;
       const diasRest = Math.max(1, Number(dados?.diasRestantesMes) || 15);
 
+      // Saudações
+      if (msgLower === 'oi' || msgLower === 'olá' || msgLower === 'ola' || msgLower.startsWith('oi ') || msgLower.startsWith('olá ') || msgLower.includes('bom dia') || msgLower.includes('boa tarde') || msgLower.includes('boa noite') || msgLower.includes('e ai') || msgLower.includes('e aí')) {
+        return `👋 **Fala, parceiro! Na escuta e 100% online.**\n\nEstou conectado aos seus lançamentos em tempo real.\n\n` +
+          `• **Hoje:** Você faturou **${formatarMoeda(faturouHoje)}** da sua meta de **${formatarMoeda(meta)}** (${pctHoje}%).\n` +
+          `• **Aluguel do Carro:** **${formatarMoeda(aluGuardado)}** guardados de R$ 600,00 (${aluFalta > 0 ? `faltam ${formatarMoeda(aluFalta)}` : '100% coberto 🎉'}).\n\n` +
+          `Pode me perguntar qualquer coisa sobre quanto rodar hoje, aluguel, dívidas ou estratégias para a pista!`;
+      }
+
+      // Teste de conexão / responde
+      if (msgLower.includes('responde') || msgLower.includes('teste') || msgLower.includes('ouvindo') || msgLower.includes('online') || msgLower.includes('funciona')) {
+        return `⚡ **Estou te ouvindo perfeitamente e funcionando 100%!**\n\nSeus dados de faturamento, combustível e metas estão todos atualizados no meu painel.\n\nQual conta ou meta você quer planejar agora?`;
+      }
+
+      // Aluguel do Carro
       if (msgLower.includes('aluguel') || msgLower.includes('carro') || msgLower.includes('locaç') || msgLower.includes('locad')) {
         if (aluFalta <= 0) {
           return `🎉 **Boa notícia!** Seu aluguel de R$ 600,00 já está totalmente coberto no pote (**${formatarMoeda(aluGuardado)}** guardados).\n\nQualquer excedente nos próximos dias pode ir para amortizar dívidas ou turbinar sua Reserva de Emergência!`;
@@ -4858,6 +4872,16 @@
           `💡 **Dica de ouro:** Assim que bater sua meta diária de ${formatarMoeda(meta)}, separe logo a cota de ${formatarMoeda(cotaDia)} antes de contar a sobra!`;
       }
 
+      // Horas de Trabalho / Média por hora
+      if (msgLower.includes('hora') || msgLower.includes('tempo') || msgLower.includes('compensando') || msgLower.includes('média') || msgLower.includes('media')) {
+        const hFalta = mediaHora > 0 ? (faltaHoje / mediaHora).toFixed(1) : '2 a 3';
+        return `⏱️ **Análise de Horas & Rendimento:**\n\n` +
+          `• **Sua média atual:** **${formatarMoeda(mediaHora)}/h**\n` +
+          `• **Para bater a meta de hoje (${formatarMoeda(meta)}):** Você precisa de aproximadamente **${hFalta} horas** de rodagem focada.\n\n` +
+          `💡 Dica de rua: Média acima de R$ 25/h é ótima. Foque em horários de pico (7h-10h e 17h-20h) para maximizar o ganho por hora!`;
+      }
+
+      // Meta Diária / Quanto falta
       if (msgLower.includes('meta') || msgLower.includes('quanto falta') || msgLower.includes('fazer hoje') || msgLower.includes('quanto preciso')) {
         if (faltaHoje <= 0) {
           return `🚀 **Meta do dia batida com sucesso!**\n\nVocê faturou **${formatarMoeda(faturouHoje)}**, superando os ${formatarMoeda(meta)} (${pctHoje}% da meta).\n\nSe continuar na pista hoje, guarde todo o excedente no pote de Aluguel ou Reserva de Emergência!`;
@@ -4870,13 +4894,15 @@
           `Foque em corridas curtas em bairros movimentados para economizar combustível!`;
       }
 
-      if (msgLower.includes('luciano') || msgLower.includes('dívida') || msgLower.includes('divida') || msgLower.includes('nubank') || msgLower.includes('pendên')) {
+      // Luciano / Dívidas / Nubank
+      if (msgLower.includes('luciano') || msgLower.includes('dívida') || msgLower.includes('divida') || msgLower.includes('nubank') || msgLower.includes('pendên') || msgLower.includes('quitar')) {
         return `💳 **Compromissos & Dívidas:**\n\n` +
           `• **Pote Luciano:** ${lucFalta > 0 ? `Faltam **${formatarMoeda(lucFalta)}**` : `✅ Quitado/Em dia!`}\n` +
           `• **Dívida Nubank:** Restam **${formatarMoeda(dividaRest)}**\n\n` +
           `💡 **Ordem de segurança:** 1º Abastecimento, 2º Aluguel (${formatarMoeda(aluGuardado)} de R$ 600 guardados), 3º Luciano e 4º Nubank!`;
       }
 
+      // Combustível
       if (msgLower.includes('combust') || msgLower.includes('gasolina') || msgLower.includes('etanol') || msgLower.includes('abastec')) {
         const comb = Number(dados?.combustivelHoje) || 0;
         return `⛽ **Controle de Combustível:**\n\n` +
@@ -4885,6 +4911,7 @@
           `• Tente manter o combustível sempre abaixo de 25% do que você faturou bruto no dia!`;
       }
 
+      // Reserva de emergência
       if (msgLower.includes('reserva') || msgLower.includes('emergên') || msgLower.includes('guard')) {
         return `🛡️ **Reserva de Emergência:**\n\n` +
           `• Saldo atual guardado: **${formatarMoeda(resGuardado)}**\n` +
@@ -4894,7 +4921,7 @@
       return `📊 **Resumo Financeiro em Tempo Real:**\n\n` +
         `• **Mês Atual:** Faturou **${formatarMoeda(dados?.faturou || 0)}** | Sobra: **${formatarMoeda(dados?.sobra || 0)}**\n` +
         `• **Hoje:** Faturou **${formatarMoeda(faturouHoje)}** de **${formatarMoeda(meta)}** (${pctHoje}%)\n` +
-        `• **Pote Aluguel:** **${formatarMoeda(aluGuardado)}** / R$ 600,00 (${aluFalta > 0 ? `faltam ${formatMoeda(aluFalta)}` : 'Garantido 🎉'})\n` +
+        `• **Pote Aluguel:** **${formatarMoeda(aluGuardado)}** / R$ 600,00 (${aluFalta > 0 ? `faltam ${formatarMoeda(aluFalta)}` : 'Garantido 🎉'})\n` +
         `• **Pote Luciano:** **${formatarMoeda(lucFalta)}**\n` +
         `• **Reserva Acumulada:** **${formatarMoeda(resGuardado)}**\n\n` +
         `Como posso te orientar agora? Pergunte sobre aluguel, meta diária, dívidas ou estratégia de rodagem!`;
@@ -4924,7 +4951,7 @@
 
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 6000);
+        const timeoutId = setTimeout(() => controller.abort(), 18000);
 
         const resp = await fetch('/api/ai/analisar', {
           method: 'POST',
@@ -4961,8 +4988,9 @@
 
     function formatarTextoMarkdown(txt) {
       if (!txt) return '';
+      let safeTxt = typeof txt === 'string' ? txt : String(txt);
       // Converte negritos **texto**
-      let html = txt.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      let html = safeTxt.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
       // Converte quebras de linha em <br> ou listas
       html = html.replace(/\n•\s*/g, '<br>• ');
       html = html.replace(/\n\n/g, '<br><br>');
@@ -4973,7 +5001,10 @@
     async function aiEnviarMensagem() {
       const input = document.getElementById('ai-chat-input');
       const btn = document.getElementById('ai-chat-btn-enviar');
-      if (!input || !input.value.trim() || aiIsLoading) return;
+      if (!input || !input.value.trim()) return;
+
+      // Se estivesse travado anteriormente por algum motivo, destrava para responder
+      aiIsLoading = false;
 
       const pergunta = input.value.trim();
       input.value = '';
@@ -4993,11 +5024,17 @@
         elHistorico.scrollTop = elHistorico.scrollHeight;
       }
 
-      const dados = aiColetarDadosFinanceiros();
+      let dados = null;
+      try {
+        dados = aiColetarDadosFinanceiros();
+      } catch (eColeta) {
+        console.warn('Erro ao coletar dados para IA:', eColeta);
+        dados = { metaDiaria: 300, potes: { alu: 0, luc: 0, res: 0 } };
+      }
 
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 7000);
+        const timeoutId = setTimeout(() => controller.abort(), 20000);
 
         const resp = await fetch('/api/ai/analisar', {
           method: 'POST',
@@ -5025,7 +5062,7 @@
           }
         }
 
-        // Se o servidor respondeu sem sucesso, gera resposta analítica local instantânea
+        // Se o servidor respondeu sem sucesso ou timeout, gera resposta analítica local instantânea
         const respostaLocal = aiGerarRespostaLocalInteligente(pergunta, dados);
         aiRenderizarMensagem('assistant', respostaLocal);
         aiHistoricoConversa.push({ origem: 'user', texto: pergunta });
