@@ -10,7 +10,7 @@
   <meta property="og:type" content="website">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -1067,6 +1067,409 @@
       padding: 8px 10px;
       font-size: 12px;
     }
+
+    /* --- ESTILOS DO PAINEL META DO DIA --- */
+    .mdd-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+    .mdd-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .mdd-input {
+      width: 100%;
+      font-family: 'Barlow Condensed', 'JetBrains Mono', sans-serif !important;
+      font-weight: 700 !important;
+      font-size: 22px !important;
+      padding: 10px 12px !important;
+      border: 1px solid var(--line) !important;
+      border-radius: 8px !important;
+      background: var(--surface2) !important;
+      color: var(--ink) !important;
+      margin-bottom: 0 !important;
+    }
+    .mdd-input:focus {
+      border-color: #f2c230 !important;
+      box-shadow: 0 0 0 3px rgba(242, 194, 48, 0.25) !important;
+      outline: none;
+    }
+    .mdd-big {
+      font-family: 'Barlow Condensed', 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 46px;
+      line-height: 1;
+      color: #f2c230;
+      letter-spacing: -0.02em;
+    }
+    .mdd-bar {
+      height: 14px;
+      background: var(--surface2);
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      overflow: hidden;
+      margin: 12px 0 8px;
+    }
+    .mdd-bar i {
+      display: block;
+      height: 100%;
+      width: 0%;
+      background: #f2c230;
+      transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      border-radius: 7px;
+    }
+    .mdd-bar i.ok {
+      background: #4cc58c;
+      box-shadow: 0 0 10px rgba(76, 197, 140, 0.5);
+    }
+    .mdd-msg {
+      font-size: 14px;
+      margin: 0;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .mdd-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 9px 0;
+      border-top: 1px solid var(--line);
+      font-size: 13px;
+    }
+    .mdd-line:first-of-type {
+      border-top: 0;
+    }
+    .mdd-line b {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .mdd-line.short span:last-child {
+      color: #ef7b64;
+    }
+    .mdd-line.full span:last-child {
+      color: #4cc58c;
+    }
+    .mdd-btn-save {
+      width: 100%;
+      font-family: 'Barlow Condensed', 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 19px;
+      padding: 13px;
+      border: 0;
+      border-radius: 8px;
+      background: #f2c230;
+      color: #16191b;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: opacity 0.15s, transform 0.05s;
+      letter-spacing: 0.02em;
+    }
+    .mdd-btn-save:active {
+      transform: scale(0.99);
+    }
+    .mdd-btn-ghost {
+      width: 100%;
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--line);
+      font-size: 13px;
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.15s;
+    }
+    .mdd-btn-ghost:hover {
+      border-color: var(--coral);
+      color: var(--coral);
+    }
+    .mdd-pots {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .mdd-pots .mdd-input {
+      font-size: 16px !important;
+      padding: 8px !important;
+    }
+    .mdd-pots label {
+      font-size: 11px;
+      margin-bottom: 3px;
+    }
+    .mdd-note {
+      font-size: 11px;
+      color: var(--muted);
+      margin: 8px 0 0;
+      line-height: 1.4;
+    }
+    .mdd-history-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-top: 1px solid var(--line);
+    }
+    .mdd-history-item:first-child {
+      border-top: none;
+    }
+    .mdd-history-meta {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+    .mdd-history-sub {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .mdd-history-actions {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .mdd-btn-mini {
+      background: var(--surface2);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 5px 9px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--ink);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .mdd-btn-mini:hover {
+      background: var(--surface3);
+    }
+    .mdd-btn-mini.danger {
+      color: var(--coral);
+      border-color: rgba(255, 92, 124, 0.3);
+    }
+    .mdd-btn-mini.danger:hover {
+      background: rgba(255, 92, 124, 0.15);
+    }
+    .mdd-badge-pots {
+      display: inline-block;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(242, 194, 48, 0.15);
+      color: #f2c230;
+      margin-right: 4px;
+      font-weight: 600;
+    }
+    .mdd-banner-sync {
+      background: rgba(52, 231, 192, 0.1);
+      border: 1px solid rgba(52, 231, 192, 0.3);
+      color: var(--cyan);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    /* Estilos do Modal de Regras de Distribuição */
+    .mdd-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(10, 12, 15, 0.75);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 16px;
+    }
+    .mdd-modal-box {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      animation: mddModalFadeIn 0.2s ease-out;
+    }
+    @keyframes mddModalFadeIn {
+      from { opacity: 0; transform: scale(0.96) translateY(8px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .mdd-modal-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface2);
+    }
+    .mdd-modal-header h3 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 20px;
+      margin: 0;
+      color: var(--ink);
+    }
+    .mdd-modal-body {
+      padding: 16px;
+      max-height: 75vh;
+      overflow-y: auto;
+    }
+    .mdd-modal-footer {
+      padding: 12px 16px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      background: var(--surface2);
+    }
+    .mdd-regras-item {
+      background: var(--surface2);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .mdd-regras-item .regras-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .mdd-regras-item .regras-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .mdd-regras-item .regras-sub {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .mdd-regras-input {
+      width: 105px !important;
+      font-size: 15px !important;
+      padding: 6px 8px !important;
+      text-align: right;
+    }
+    .mdd-dest-row {
+      background: var(--surface2);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: border-color 0.15s;
+    }
+    .mdd-dest-row:focus-within {
+      border-color: var(--sig);
+    }
+    .mdd-dest-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .mdd-dest-order-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--sig);
+      flex-shrink: 0;
+    }
+    .mdd-dest-name-input {
+      flex: 1;
+      font-size: 14px !important;
+      padding: 6px 10px !important;
+      font-weight: 600 !important;
+      border-radius: 6px !important;
+    }
+    .mdd-dest-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .mdd-dest-btn-icon {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      border-radius: 6px;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.15s;
+      padding: 0;
+    }
+    .mdd-dest-btn-icon:hover:not(:disabled) {
+      color: var(--ink);
+      border-color: var(--muted);
+    }
+    .mdd-dest-btn-icon:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+    .mdd-dest-btn-icon.danger:hover {
+      color: #ef7b64;
+      border-color: #ef7b64;
+      background: rgba(239, 123, 100, 0.1);
+    }
+    .mdd-dest-body {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .mdd-dest-type-badge {
+      font-size: 11px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .mdd-dest-val-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .mdd-dest-val-wrapper span {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .mdd-add-box {
+      border: 1px dashed var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 10px;
+      background: rgba(255, 255, 255, 0.02);
+    }
   </style>
 </head>
 <body>
@@ -1466,6 +1869,9 @@
             <option value="out">Apenas Saídas</option>
           </select>
         </div>
+        <div style="margin-bottom: 12px;">
+          <input type="text" id="filtro-busca" placeholder="🔍 Buscar por descrição, posto, categoria..." style="margin-bottom: 0; padding: 9px 12px; font-size: 13px;" oninput="renderizarHistorico()">
+        </div>
         <div id="lista-completa">
           <!-- Renderizado via JS -->
         </div>
@@ -1475,7 +1881,13 @@
     <!-- ABA 6: CONFIGURAÇÕES & BACKUP -->
     <div id="tab-config" class="tab-content">
       <div class="card">
-        <h2>Metas & Dívidas</h2>
+        <h2>Metas, Caixa & Dívidas</h2>
+        <label for="cfg-saldo-inicial">Saldo Inicial em Conta / Caixa Inicial (R$)</label>
+        <input type="number" id="cfg-saldo-inicial" step="50" placeholder="Ex: 500 ou 0">
+        <p style="font-size: 11px; color: var(--muted); margin-top: -6px; margin-bottom: 14px;">
+          Saldo em dinheiro ou banco que você já tinha antes de usar o app. É somado ao Saldo Total em Caixa.
+        </p>
+
         <label for="cfg-divida-total">Valor Total da Dívida Inicial - Nubank (R$)</label>
         <input type="number" id="cfg-divida-total" step="100" placeholder="Ex: 7000">
 
@@ -1520,6 +1932,142 @@
       </div>
     </div>
 
+    <!-- ABA 7: META DO DIA (CALCULADORA & DISTRIBUIÇÃO DIÁRIA) -->
+    <div id="tab-metadia" class="tab-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <div>
+          <h1 style="font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 700; margin: 0; color: var(--ink);">Meta do dia</h1>
+          <span id="mdd-meta-sub" style="font-size: 12px; color: var(--muted); font-family: 'Barlow Condensed', sans-serif; font-weight: 600;">Meta: R$ 300,00 brutos por dia rodado</span>
+        </div>
+        <button class="mdd-btn-mini" onclick="mddEditarMetaAlvo()" title="Alterar valor da meta diária">
+          ✏️ Ajustar Meta
+        </button>
+      </div>
+
+      <div class="mdd-banner-sync">
+        <span>⚡</span>
+        <span>Ao clicar em <b>"Registrar o dia"</b>, o faturamento e combustível são salvos no extrato geral e atualizam os potes de saldo.</span>
+      </div>
+
+      <section class="mdd-card">
+        <div class="mdd-row">
+          <div>
+            <label for="mdd-uber">Uber hoje (R$)</label>
+            <input id="mdd-uber" class="mdd-input" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0,00">
+          </div>
+          <div>
+            <label for="mdd-comb">Combustível hoje (R$)</label>
+            <input id="mdd-comb" class="mdd-input" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0,00">
+          </div>
+        </div>
+      </section>
+
+      <section class="mdd-card" aria-live="polite">
+        <div class="mdd-big" id="mdd-falta">R$ 300,00</div>
+        <div class="mdd-bar"><i id="mdd-barra"></i></div>
+        <p class="mdd-msg" id="mdd-msg">Digite o que a Uber pagou hoje.</p>
+      </section>
+
+      <section class="mdd-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <h2 style="font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 700; margin: 0;">Para onde vai o dinheiro</h2>
+          <button class="mdd-btn-mini" onclick="mddAbrirModalRegras()" title="Editar valores e prioridades de para onde vai o dinheiro">
+            ⚙️ Editar Destinos
+          </button>
+        </div>
+        <div id="mdd-lista"></div>
+        <button id="mdd-salvar" class="mdd-btn-save" type="button">Registrar o dia</button>
+        <p class="mdd-note" id="mdd-ordem-resumo">Ordem de prioridade: combustível e taxa (R$ 4,50), aluguel (R$ 100), pessoal (R$ 40), Luciano (R$ 100), reserva.</p>
+      </section>
+
+      <section class="mdd-card">
+        <h2 style="font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 700; margin-bottom: 8px;">Meus saldos</h2>
+        <div class="mdd-pots">
+          <div>
+            <label for="mdd-pLuc">Falta pro Luciano</label>
+            <input id="mdd-pLuc" class="mdd-input" type="number" inputmode="decimal" min="0" step="0.01">
+          </div>
+          <div>
+            <label for="mdd-pAlu">Aluguel guardado</label>
+            <input id="mdd-pAlu" class="mdd-input" type="number" inputmode="decimal" min="0" step="0.01">
+          </div>
+          <div>
+            <label for="mdd-pRes">Reserva</label>
+            <input id="mdd-pRes" class="mdd-input" type="number" inputmode="decimal" min="0" step="0.01">
+          </div>
+        </div>
+        <p class="mdd-note">Aluguel de R$ 600 vence por volta de 17/10. Você pode corrigir os saldos a qualquer momento.</p>
+        <button class="mdd-btn-ghost" id="mdd-zerar" type="button">Zerar saldos</button>
+      </section>
+
+      <!-- HISTÓRICO DE DIAS REGISTRADOS COM EDITAR E EXCLUIR -->
+      <section class="mdd-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <h2 style="font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 700; margin: 0;">📅 Dias Registrados Recentes</h2>
+          <span style="font-size: 11px; color: var(--muted);">Editar ou excluir</span>
+        </div>
+        <div id="mdd-historico-dias">
+          <!-- Renderizado dinamicamente via JS -->
+        </div>
+      </section>
+    </div>
+
+    <!-- MODAL DE EDIÇÃO DE REGRAS E DESTINOS DA META DO DIA -->
+    <div id="mdd-modal-regras" class="mdd-modal-overlay" style="display: none;">
+      <div class="mdd-modal-box">
+        <div class="mdd-modal-header">
+          <h3>⚙️ Editar Destinos do Dinheiro</h3>
+          <button type="button" onclick="mddFecharModalRegras()" style="background:transparent; border:none; color:var(--muted); font-size:20px; cursor:pointer;">✕</button>
+        </div>
+        <div class="mdd-modal-body">
+          <p style="font-size: 12px; color: var(--muted); margin-bottom: 12px; line-height: 1.4;">
+            Você pode <b>mudar os nomes</b>, <b>valores</b>, <b>ordem de prioridade (▲ ▼)</b>, <b>remover</b> ou <b>acrescentar novos destinos</b>. O dinheiro da corrida segue esta ordem exata até o que sobrar ir para a <b>Reserva</b>.
+          </p>
+
+          <!-- Taxa Fixa do App (aplicada junto ao combustível) -->
+          <div class="mdd-regras-item" style="border-left: 3px solid var(--sig);">
+            <div class="regras-info">
+              <div class="regras-title">⛽ Taxa fixa do app/dia</div>
+              <div class="regras-sub">Somada ao combustível informado no dia (R$)</div>
+            </div>
+            <input id="mdd-cfg-taxa" class="mdd-input mdd-regras-input" type="number" step="0.50" min="0" placeholder="0,00">
+          </div>
+
+          <!-- Lista Dinâmica de Destinos (Ordenável e Editável) -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin: 12px 0 6px;">
+            <span style="font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px;">Destinos por Prioridade:</span>
+            <span style="font-size: 11px; color: var(--muted);">Use ▲ ▼ para mudar ordem</span>
+          </div>
+
+          <div id="mdd-regras-destinos-lista">
+            <!-- Renderizado dinamicamente via JS com inputs de nome, valor e botões de subir/descer/excluir -->
+          </div>
+
+          <!-- Formulário para acrescentar novo destino -->
+          <div class="mdd-add-box">
+            <div style="font-size: 12px; font-weight: 700; color: var(--ink); margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
+              <span>➕ Acrescentar Novo Destino</span>
+            </div>
+            <div style="display: flex; gap: 6px; margin-bottom: 6px;">
+              <input id="mdd-novo-nome" class="mdd-input" type="text" placeholder="Ex: Manutenção, Seguro..." style="flex: 1; font-size: 13px; padding: 6px 10px;">
+              <input id="mdd-novo-valor" class="mdd-input" type="number" step="5" min="0" placeholder="R$ Cota" style="width: 90px; font-size: 13px; padding: 6px 8px; text-align: right;">
+            </div>
+            <button type="button" class="mdd-btn-mini" onclick="mddAdicionarNovoDestino()" style="width: 100%; background: var(--surface); color: var(--sig); border-color: var(--sig); font-weight: 600;">
+              Adicionar à lista
+            </button>
+          </div>
+
+          <div style="background: rgba(242, 194, 48, 0.1); border: 1px solid rgba(242, 194, 48, 0.3); border-radius: 6px; padding: 10px; font-size: 11px; color: var(--ink); margin-top: 12px;">
+            💡 <b>Excedente / Reserva:</b> Todo o valor que sobrar após cobrir os destinos acima é depositado automaticamente na <b>Reserva</b>.
+          </div>
+        </div>
+        <div class="mdd-modal-footer">
+          <button type="button" class="mdd-btn-mini" onclick="mddRestaurarRegrasPadrao()" style="margin-right:auto;">Restaurar Padrão</button>
+          <button type="button" class="mdd-btn-mini" onclick="mddFecharModalRegras()">Cancelar</button>
+          <button type="button" class="mdd-btn-mini" onclick="mddSalvarRegrasModal()" style="background:var(--sig); color:#1d2124; border-color:var(--sig); font-weight:700;">Salvar Alterações</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Bottom Navigation Bar (6 Itens) -->
@@ -1535,6 +2083,10 @@
     <button class="nav-item" data-tab="metas" onclick="trocarAba('metas')">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
       <span>Metas</span>
+    </button>
+    <button class="nav-item" data-tab="metadia" onclick="trocarAba('metadia')">
+      <svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      <span>Meta Dia</span>
     </button>
     <button class="nav-item" data-tab="graficos" onclick="trocarAba('graficos')">
       <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
@@ -1696,6 +2248,7 @@
 
     // Configurações padrão
     let config = {
+      saldoInicial: 0,
       dividaInicial: 7000,
       valorAluguelRapido: 600,
       metaDiaria: 300
@@ -1777,6 +2330,8 @@
         atualizarResumo();
       } else if (nomeAba === 'metas') {
         atualizarMetas();
+      } else if (nomeAba === 'metadia') {
+        atualizarMetaDiaModulo();
       } else if (nomeAba === 'graficos') {
         atualizarGraficos();
       } else if (nomeAba === 'historico') {
@@ -2062,7 +2617,8 @@
       }
 
       // 1. Separa lançamentos anteriores e do mês selecionado
-      let saldoAnterior = 0;
+      // Inicia com o Saldo Inicial configurado pelo motorista (ex: valor que já tinha na conta/bolso)
+      let saldoAnterior = Number(config.saldoInicial) || 0;
       let totalFaturou = 0;
       let totalGastou = 0;
       let totalHoras = 0;
@@ -2131,6 +2687,9 @@
       if (elSaldoAnterior) {
         elSaldoAnterior.textContent = formatarMoeda(saldoAnterior);
         elSaldoAnterior.style.color = saldoAnterior >= 0 ? 'var(--ink)' : 'var(--coral)';
+        if (Number(config.saldoInicial) > 0) {
+          elSaldoAnterior.title = `${formatarMoeda(saldoAnterior)} (inclui ${formatarMoeda(config.saldoInicial)} de saldo inicial)`;
+        }
       }
 
       if (elSaldoTotalCaixa) {
@@ -2193,11 +2752,23 @@
       const metaAlvo = Number(config.metaDiaria) || 300;
       const pctHoje = Math.round((faturadoHoje / metaAlvo) * 100);
       const elStatusMetaHome = document.getElementById('val-status-meta-home');
+      const elStatusMetaSub = document.getElementById('val-status-meta-sub');
       if (elStatusMetaHome) {
         let textoRitmo = '🐢 Abaixo';
         if (pctHoje >= 100) textoRitmo = '🚀 Voando';
         else if (pctHoje >= 50) textoRitmo = '⚡ No Ritmo';
         elStatusMetaHome.textContent = `${pctHoje}% (${textoRitmo})`;
+      }
+      if (elStatusMetaSub) {
+        if (faturadoHoje >= metaAlvo) {
+          const sobraMeta = faturadoHoje - metaAlvo;
+          elStatusMetaSub.textContent = `🎉 Meta batida! (+${formatarMoeda(sobraMeta)})`;
+          elStatusMetaSub.style.color = 'var(--cyan)';
+        } else {
+          const faltaMeta = metaAlvo - faturadoHoje;
+          elStatusMetaSub.textContent = `Falta ${formatarMoeda(faltaMeta)} p/ meta`;
+          elStatusMetaSub.style.color = 'var(--muted)';
+        }
       }
 
       // Renderiza os 4 últimos lançamentos na home
@@ -2301,6 +2872,677 @@
       if (barDividaMetas) barDividaMetas.style.width = pctDivida + '%';
       if (statusPaga) statusPaga.textContent = `${formatarMoeda(totalAbatido)} quitados (${pctDivida}%)`;
       if (statusResta) statusResta.textContent = dividaRestante === 0 ? 'DÍVIDA NUBANK ZERADA! 🎉' : `Resta ${formatarMoeda(dividaRestante)}`;
+    }
+
+    // --- MÓDULO EXCLUSIVO: META DO DIA (CÁLCULO & POTES) ---
+    const MDD_META = 300, MDD_KEY = "metaDiaria.v1", MDD_REGRAS_KEY = "metaDiaria.regras.v2";
+    const MDD_DEF = { luc: 600, alu: 0, res: 0 };
+    
+    // Lista padrão de destinos com prioridade
+    const MDD_DESTINOS_PADRAO = [
+      { id: 'aluguel', nome: 'Aluguel', valor: 100, potKey: 'alu' },
+      { id: 'pessoal', nome: 'Pessoal', valor: 40, potKey: null },
+      { id: 'luciano', nome: 'Luciano', valor: 100, potKey: 'luc' }
+    ];
+    const MDD_REGRAS_DEF = {
+      taxa: 4.5,
+      destinos: MDD_DESTINOS_PADRAO
+    };
+
+    function mddLoadRegras() {
+      try {
+        const r = JSON.parse(localStorage.getItem(MDD_REGRAS_KEY));
+        if (r && Array.isArray(r.destinos)) {
+          return {
+            taxa: typeof r.taxa === 'number' ? r.taxa : MDD_REGRAS_DEF.taxa,
+            destinos: r.destinos
+          };
+        }
+        // Migração da v1 antiga para v2 com lista de destinos
+        const rAntigo = JSON.parse(localStorage.getItem("metaDiaria.regras.v1"));
+        if (rAntigo && typeof rAntigo.alug === 'number') {
+          return {
+            taxa: typeof rAntigo.taxa === 'number' ? rAntigo.taxa : 4.5,
+            destinos: [
+              { id: 'aluguel', nome: 'Aluguel', valor: Number(rAntigo.alug) || 100, potKey: 'alu' },
+              { id: 'pessoal', nome: 'Pessoal', valor: Number(rAntigo.pess) || 40, potKey: null },
+              { id: 'luciano', nome: 'Luciano', valor: Number(rAntigo.luc) || 100, potKey: 'luc' }
+            ]
+          };
+        }
+      } catch (e) {}
+      return JSON.parse(JSON.stringify(MDD_REGRAS_DEF));
+    }
+
+    function mddSaveRegras(r) {
+      try {
+        localStorage.setItem(MDD_REGRAS_KEY, JSON.stringify(r));
+      } catch (e) {}
+    }
+
+    let mddRegras = mddLoadRegras();
+
+    function mddLoad() {
+      try {
+        const s = JSON.parse(localStorage.getItem(MDD_KEY));
+        if (s && typeof s.luc === "number") return s;
+      } catch (e) {}
+      return { luc: MDD_DEF.luc, alu: MDD_DEF.alu, res: MDD_DEF.res };
+    }
+
+    function mddSave(s) {
+      try {
+        localStorage.setItem(MDD_KEY, JSON.stringify(s));
+      } catch (e) {}
+    }
+
+    let mddState = mddLoad();
+
+    function mddBrl(n) {
+      return "R$ " + (Number(n) || 0).toFixed(2).replace(".", ",");
+    }
+
+    function mddNum(id) {
+      const el = document.getElementById(id);
+      if (!el) return 0;
+      const v = parseFloat(el.value);
+      return isFinite(v) && v > 0 ? v : 0;
+    }
+
+    function mddShowPots() {
+      const pLuc = document.getElementById("mdd-pLuc");
+      const pAlu = document.getElementById("mdd-pAlu");
+      const pRes = document.getElementById("mdd-pRes");
+      if (pLuc) pLuc.value = mddState.luc.toFixed(2);
+      if (pAlu) pAlu.value = mddState.alu.toFixed(2);
+      if (pRes) pRes.value = mddState.res.toFixed(2);
+    }
+
+    function mddPlan() {
+      const u = mddNum("mdd-uber");
+      const c = mddNum("mdd-comb");
+      let r = u;
+      const out = [];
+
+      function take(nome, want, id, potKey) {
+        const g = Math.min(r, want);
+        r -= g;
+        out.push({ id: id, n: nome, want: want, got: g, potKey: potKey });
+        return g;
+      }
+
+      // 1. Sempre prioritário: Combustível hoje e taxa diária configurada
+      const taxaVal = Number(mddRegras.taxa) || 0;
+      take("Combustível e taxa", c + (u > 0 ? taxaVal : 0), 'combustivel_taxa', null);
+
+      // 2. Destinos dinâmicos e configuráveis (Aluguel, Pessoal, Luciano, e quaisquer outros adicionados)
+      if (Array.isArray(mddRegras.destinos)) {
+        mddRegras.destinos.forEach(dest => {
+          const val = Number(dest.valor) || 0;
+          if (val > 0) {
+            // Se for atrelado à dívida do Luciano, não deduz mais do que o saldo devedor restante
+            if (dest.potKey === 'luc') {
+              if (mddState.luc > 0) {
+                take(dest.nome, Math.min(val, mddState.luc), dest.id, dest.potKey);
+              }
+            } else {
+              take(dest.nome, val, dest.id, dest.potKey || null);
+            }
+          }
+        });
+      }
+
+      // 3. Sobra / Excedente vai para a Reserva
+      const res = r;
+      out.push({ id: 'reserva', n: "Reserva", want: null, got: res, potKey: 'res' });
+      return { u: u, c: c, out: out, res: res };
+    }
+
+    function mddRender() {
+      const p = mddPlan();
+      const u = p.u;
+      const meta = (config && config.metaDiaria) ? Number(config.metaDiaria) : MDD_META;
+      const falta = Math.max(0, meta - u);
+
+      const elFalta = document.getElementById("mdd-falta");
+      if (elFalta) elFalta.textContent = falta > 0 ? mddBrl(falta) : "Meta batida";
+
+      const pct = Math.min(100, (u / meta) * 100);
+      const b = document.getElementById("mdd-barra");
+      if (b) {
+        b.style.width = pct + "%";
+        b.className = u >= meta ? "ok" : "";
+      }
+
+      const elMsg = document.getElementById("mdd-msg");
+      if (elMsg) {
+        if (u === 0) {
+          elMsg.textContent = "Digite o que a Uber pagou hoje.";
+        } else if (u >= meta) {
+          elMsg.textContent = "Passou " + mddBrl(u - meta) + " da meta. O excedente vai pra reserva.";
+        } else {
+          elMsg.textContent = "Você fez " + mddBrl(u) + " de " + mddBrl(meta) + ".";
+        }
+      }
+
+      const elLista = document.getElementById("mdd-lista");
+      if (elLista) {
+        elLista.innerHTML = p.out.map(function(o) {
+          const cls = o.want === null ? "" : (o.got + 0.005 >= o.want ? "full" : "short");
+          const t = o.want === null ? mddBrl(o.got) : mddBrl(o.got) + (o.got + 0.005 < o.want ? " de " + mddBrl(o.want) : "");
+          return '<div class="mdd-line ' + cls + '"><span>' + o.n + '</span><span><b>' + t + '</b></span></div>';
+        }).join("");
+      }
+    }
+
+    function registrarDiaMetaDia() {
+      const p = mddPlan();
+      if (p.u <= 0) {
+        alert("Digite o valor que a Uber pagou hoje para registrar o dia.");
+        return;
+      }
+
+      // 1. Atualiza os saldos dos potes
+      p.out.forEach(function(o) {
+        if (o.potKey === "alu" || o.n === "Aluguel") mddState.alu += o.got;
+        if (o.potKey === "luc" || o.n === "Luciano") mddState.luc = Math.max(0, mddState.luc - o.got);
+        if (o.potKey === "res" || o.n === "Reserva") mddState.res += o.got;
+      });
+      mddSave(mddState);
+      mddShowPots();
+
+      // 2. Integração inteligente: salva também no extrato/lançamentos gerais do app
+      const dataHoje = getHojeBrasilia();
+      const metaRegistroId = 'mdd-' + Date.now();
+
+      // Guarda os valores distribuídos nos potes para permitir reverter/editar depois
+      const potesDistribuidos = {
+        alu: 0,
+        luc: 0,
+        res: 0
+      };
+      p.out.forEach(function(o) {
+        if (o.potKey === "alu" || o.n === "Aluguel") potesDistribuidos.alu += o.got;
+        if (o.potKey === "luc" || o.n === "Luciano") potesDistribuidos.luc += o.got;
+        if (o.potKey === "res" || o.n === "Reserva") potesDistribuidos.res += o.got;
+      });
+
+      // Entrada da Uber
+      lancamentos.unshift({
+        id: metaRegistroId + '-uber',
+        mddGroupId: metaRegistroId,
+        mddPotes: potesDistribuidos,
+        tipo: 'in',
+        valor: p.u,
+        horas: 0,
+        categoria: 'Corrida/Trabalho',
+        desc: 'Meta do Dia - Uber hoje',
+        data: dataHoje
+      });
+
+      // Se teve combustível informado, lança despesa
+      if (p.c > 0) {
+        lancamentos.unshift({
+          id: metaRegistroId + '-comb',
+          mddGroupId: metaRegistroId,
+          tipo: 'out',
+          valor: p.c,
+          horas: 0,
+          categoria: 'Combustível',
+          desc: 'Combustível - Meta do Dia',
+          data: dataHoje
+        });
+      }
+
+      salvarDados();
+      atualizarResumo();
+      atualizarMetas();
+      atualizarGraficos();
+      renderizarHistorico();
+      mddRenderHistoricoDias();
+
+      const inUber = document.getElementById("mdd-uber");
+      const inComb = document.getElementById("mdd-comb");
+      if (inUber) inUber.value = "";
+      if (inComb) inComb.value = "";
+      mddRender();
+
+      const elMsg = document.getElementById("mdd-msg");
+      if (elMsg) elMsg.textContent = "✅ Dia registrado com sucesso! Saldos e extrato sincronizados.";
+    }
+
+    // --- RENDERIZAR HISTÓRICO DE DIAS DA META DO DIA ---
+    function mddRenderHistoricoDias() {
+      const container = document.getElementById('mdd-historico-dias');
+      if (!container) return;
+
+      // Agrupa ou busca lançamentos originados pela Meta do Dia
+      // Identifica pelo mddGroupId ou pela descrição padrão
+      const grupos = {};
+
+      lancamentos.forEach(item => {
+        if (item.mddGroupId) {
+          if (!grupos[item.mddGroupId]) {
+            grupos[item.mddGroupId] = { id: item.mddGroupId, data: item.data, uber: 0, comb: 0, potes: item.mddPotes || null, items: [] };
+          }
+          grupos[item.mddGroupId].items.push(item);
+          if (item.tipo === 'in') grupos[item.mddGroupId].uber = item.valor;
+          if (item.tipo === 'out') grupos[item.mddGroupId].comb = item.valor;
+        } else if (item.desc && (item.desc.includes('Meta do Dia') || item.categoria === 'Corrida/Trabalho' && item.desc.includes('Uber hoje'))) {
+          // Retrocompatibilidade com registros anteriores
+          const chaveSimples = 'legado-' + item.data + '-' + item.id;
+          if (!grupos[chaveSimples]) {
+            grupos[chaveSimples] = { id: chaveSimples, data: item.data, uber: item.tipo === 'in' ? item.valor : 0, comb: item.tipo === 'out' ? item.valor : 0, potes: null, items: [item] };
+          }
+        }
+      });
+
+      const listaGrupos = Object.values(grupos).sort((a, b) => (b.data || '').localeCompare(a.data || ''));
+
+      if (listaGrupos.length === 0) {
+        container.innerHTML = '<div style="font-size: 13px; color: var(--muted); text-align: center; padding: 16px 0;">Nenhum dia registrado pela Meta do Dia ainda. Ao registrar, ele aparecerá aqui com opções de editar ou excluir.</div>';
+        return;
+      }
+
+      container.innerHTML = listaGrupos.slice(0, 10).map(g => {
+        const dataFormatada = g.data ? formatarDataItem(g.data) : 'Data não informada';
+        const valorUberStr = mddBrl(g.uber);
+        const valorCombStr = g.comb > 0 ? ` • Combustível: ${mddBrl(g.comb)}` : '';
+
+        return `
+          <div class="mdd-history-item">
+            <div>
+              <div class="mdd-history-meta">
+                <span>Uber: ${valorUberStr}</span>
+                <span style="font-weight: 400; font-size: 12px; color: var(--muted);">${valorCombStr}</span>
+              </div>
+              <div class="mdd-history-sub">
+                <span>📅 ${dataFormatada}</span>
+              </div>
+            </div>
+            <div class="mdd-history-actions">
+              <button class="mdd-btn-mini" onclick="mddEditarDia('${g.id}')" title="Editar valores deste dia">
+                ✏️ Editar
+              </button>
+              <button class="mdd-btn-mini danger" onclick="mddExcluirDia('${g.id}')" title="Tirar / Excluir este dia">
+                🗑️ Tirar
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // --- TIRAR / EXCLUIR REGISTRO DA META DO DIA ---
+    function mddExcluirDia(groupId) {
+      if (!confirm('Deseja realmente tirar (excluir) este registro de dia da Meta do Dia? Os valores serão removidos do extrato e você poderá ajustar os saldos se desejar.')) {
+        return;
+      }
+
+      // Procura itens associados a este grupo
+      const itensGrupo = lancamentos.filter(item => item.mddGroupId === groupId || ('legado-' + item.data + '-' + item.id) === groupId);
+
+      // Se houver potes salvos, pergunta se deseja estornar dos saldos acumulados
+      const itemComPotes = itensGrupo.find(it => it.mddPotes);
+      if (itemComPotes && itemComPotes.mddPotes) {
+        const estornar = confirm('Deseja também estornar/subtrair os valores distribuídos dos seus saldos acumulados (Aluguel, Luciano e Reserva)?');
+        if (estornar) {
+          const pt = itemComPotes.mddPotes;
+          if (pt.alu) mddState.alu = Math.max(0, mddState.alu - pt.alu);
+          if (pt.luc) mddState.luc += pt.luc; // Devolve à dívida do Luciano que faltava
+          if (pt.res) mddState.res = Math.max(0, mddState.res - pt.res);
+          mddSave(mddState);
+          mddShowPots();
+        }
+      }
+
+      // Remove do extrato de lançamentos
+      lancamentos = lancamentos.filter(item => item.mddGroupId !== groupId && ('legado-' + item.data + '-' + item.id) !== groupId);
+
+      salvarDados();
+      atualizarResumo();
+      atualizarMetas();
+      atualizarGraficos();
+      renderizarHistorico();
+      mddRenderHistoricoDias();
+
+      const elMsg = document.getElementById("mdd-msg");
+      if (elMsg) elMsg.textContent = "🗑️ Registro do dia removido com sucesso.";
+    }
+
+    // --- EDITAR REGISTRO DA META DO DIA ---
+    function mddEditarDia(groupId) {
+      const itensGrupo = lancamentos.filter(item => item.mddGroupId === groupId || ('legado-' + item.data + '-' + item.id) === groupId);
+      if (itensGrupo.length === 0) return;
+
+      const itemIn = itensGrupo.find(it => it.tipo === 'in') || { valor: 0, data: getHojeBrasilia() };
+      const itemOut = itensGrupo.find(it => it.tipo === 'out');
+      const combAtual = itemOut ? itemOut.valor : 0;
+
+      const novoUberRaw = prompt('Novo valor da Uber para este dia (R$):', itemIn.valor);
+      if (novoUberRaw === null) return;
+      const novoUber = parseFloat(novoUberRaw.replace(',', '.'));
+      if (isNaN(novoUber) || novoUber < 0) {
+        alert('Por favor, informe um valor numérico válido.');
+        return;
+      }
+
+      const novoCombRaw = prompt('Novo valor de Combustível para este dia (R$):', combAtual);
+      if (novoCombRaw === null) return;
+      const novoComb = parseFloat(novoCombRaw.replace(',', '.'));
+      if (isNaN(novoComb) || novoComb < 0) {
+        alert('Por favor, informe um valor numérico válido.');
+        return;
+      }
+
+      // Atualiza os lançamentos
+      if (itemIn) {
+        itemIn.valor = novoUber;
+      }
+      if (itemOut) {
+        if (novoComb > 0) {
+          itemOut.valor = novoComb;
+        } else {
+          // Remove despesa de combustível se zerou
+          lancamentos = lancamentos.filter(it => it.id !== itemOut.id);
+        }
+      } else if (novoComb > 0) {
+        // Cria item de combustível se não existia
+        lancamentos.push({
+          id: groupId + '-comb',
+          mddGroupId: groupId,
+          tipo: 'out',
+          valor: novoComb,
+          horas: 0,
+          categoria: 'Combustível',
+          desc: 'Combustível - Meta do Dia',
+          data: itemIn.data || getHojeBrasilia()
+        });
+      }
+
+      salvarDados();
+      atualizarResumo();
+      atualizarMetas();
+      atualizarGraficos();
+      renderizarHistorico();
+      mddRenderHistoricoDias();
+
+      alert('Valores do dia atualizados com sucesso!');
+    }
+
+    // --- AJUSTAR VALOR DA META DIÁRIA ---
+    function mddEditarMetaAlvo() {
+      const metaAtual = (config && config.metaDiaria) ? Number(config.metaDiaria) : MDD_META;
+      const novo = prompt('Defina o valor da sua meta de faturamento por dia (R$):', metaAtual);
+      if (novo !== null) {
+        const v = parseFloat(novo.replace(',', '.'));
+        if (!isNaN(v) && v > 0) {
+          config.metaDiaria = v;
+          salvarDados();
+          atualizarMetas();
+          mddRender();
+          const sub = document.getElementById('mdd-meta-sub');
+          if (sub) sub.textContent = `Meta: ${mddBrl(v)} brutos por dia rodado`;
+        } else {
+          alert('Por favor, informe um valor numérico válido maior que zero.');
+        }
+      }
+    }
+
+    // --- MODAL & EDIÇÃO: PARA ONDE VAI O DINHEIRO (DESTINOS, NOMES, ACRESCENTAR E ORDEM) ---
+    let mddTempDestinos = [];
+
+    function mddAtualizarResumoTextoRegras() {
+      const elResumo = document.getElementById("mdd-ordem-resumo");
+      if (!elResumo) return;
+      const partes = [
+        `combustível e taxa (${mddBrl(mddRegras.taxa)})`
+      ];
+      if (Array.isArray(mddRegras.destinos)) {
+        mddRegras.destinos.forEach(d => {
+          partes.push(`${d.nome} (${mddBrl(d.valor)})`);
+        });
+      }
+      partes.push('reserva');
+      elResumo.textContent = `Ordem de prioridade: ${partes.join(', ')}.`;
+    }
+
+    function mddRenderModalDestinos() {
+      const container = document.getElementById('mdd-regras-destinos-lista');
+      if (!container) return;
+
+      if (!mddTempDestinos || mddTempDestinos.length === 0) {
+        container.innerHTML = '<div style="font-size: 12px; color: var(--muted); text-align: center; padding: 12px; background: var(--surface2); border-radius: 6px;">Nenhum destino intermediário ativo. O valor após combustível irá direto para a Reserva. Você pode acrescentar novos abaixo!</div>';
+        return;
+      }
+
+      container.innerHTML = mddTempDestinos.map((dest, idx) => {
+        const isFirst = idx === 0;
+        const isLast = idx === mddTempDestinos.length - 1;
+        const potBadge = dest.potKey === 'alu' ? '<span class="mdd-badge-pots" style="margin-left:4px;">Pote Aluguel</span>' :
+                         dest.potKey === 'luc' ? '<span class="mdd-badge-pots" style="margin-left:4px;">Pote Dívida</span>' : '';
+
+        return `
+          <div class="mdd-dest-row" data-idx="${idx}">
+            <div class="mdd-dest-header">
+              <span class="mdd-dest-order-badge">${idx + 1}º</span>
+              <input type="text" class="mdd-input mdd-dest-name-input" value="${dest.nome}" 
+                placeholder="Nome do destino"
+                onchange="mddAtualizarNomeTemp(${idx}, this.value)"
+                title="Clique para editar o nome deste destino">
+              <div class="mdd-dest-actions">
+                <button type="button" class="mdd-dest-btn-icon" onclick="mddMoverDestino(${idx}, -1)" ${isFirst ? 'disabled' : ''} title="Subir prioridade">▲</button>
+                <button type="button" class="mdd-dest-btn-icon" onclick="mddMoverDestino(${idx}, 1)" ${isLast ? 'disabled' : ''} title="Descer prioridade">▼</button>
+                <button type="button" class="mdd-dest-btn-icon danger" onclick="mddRemoverDestino(${idx})" title="Tirar este destino">🗑️</button>
+              </div>
+            </div>
+            <div class="mdd-dest-body">
+              <div class="mdd-dest-type-badge">
+                <span>Cota diária:</span>
+                ${potBadge}
+              </div>
+              <div class="mdd-dest-val-wrapper">
+                <span>R$</span>
+                <input type="number" step="1" min="0" class="mdd-input mdd-regras-input" 
+                  value="${(Number(dest.valor) || 0).toFixed(2)}"
+                  placeholder="0,00"
+                  onchange="mddAtualizarValorTemp(${idx}, this.value)">
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function mddAtualizarNomeTemp(idx, novoNome) {
+      if (mddTempDestinos[idx]) {
+        mddTempDestinos[idx].nome = novoNome.trim() || `Destino ${idx + 1}`;
+      }
+    }
+
+    function mddAtualizarValorTemp(idx, novoValor) {
+      if (mddTempDestinos[idx]) {
+        const v = parseFloat(novoValor);
+        mddTempDestinos[idx].valor = !isNaN(v) && v >= 0 ? v : 0;
+      }
+    }
+
+    function mddMoverDestino(idx, direcao) {
+      // Ler valores atuais dos inputs antes de reordenar
+      mddSincronizarInputsParaTemp();
+      const novoIdx = idx + direcao;
+      if (novoIdx < 0 || novoIdx >= mddTempDestinos.length) return;
+      const item = mddTempDestinos.splice(idx, 1)[0];
+      mddTempDestinos.splice(novoIdx, 0, item);
+      mddRenderModalDestinos();
+    }
+
+    function mddRemoverDestino(idx) {
+      mddSincronizarInputsParaTemp();
+      const item = mddTempDestinos[idx];
+      if (!item) return;
+      if (confirm(`Deseja realmente tirar o destino "${item.nome}" da distribuição da meta diária?`)) {
+        mddTempDestinos.splice(idx, 1);
+        mddRenderModalDestinos();
+      }
+    }
+
+    function mddAdicionarNovoDestino() {
+      mddSincronizarInputsParaTemp();
+      const inNome = document.getElementById('mdd-novo-nome');
+      const inVal = document.getElementById('mdd-novo-valor');
+      if (!inNome || !inVal) return;
+
+      const nome = inNome.value.trim();
+      const val = parseFloat(inVal.value);
+
+      if (!nome) {
+        alert('Digite o nome do novo destino (ex: Manutenção, Seguro, IPVA, Comida...).');
+        inNome.focus();
+        return;
+      }
+      if (isNaN(val) || val <= 0) {
+        alert('Informe um valor de cota diária válido em reais (ex: 20, 50, etc).');
+        inVal.focus();
+        return;
+      }
+
+      const novoId = 'custom-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+      mddTempDestinos.push({
+        id: novoId,
+        nome: nome,
+        valor: val,
+        potKey: null
+      });
+
+      inNome.value = '';
+      inVal.value = '';
+      mddRenderModalDestinos();
+    }
+
+    function mddSincronizarInputsParaTemp() {
+      const container = document.getElementById('mdd-regras-destinos-lista');
+      if (!container) return;
+      const rows = container.querySelectorAll('.mdd-dest-row');
+      rows.forEach(row => {
+        const idx = parseInt(row.getAttribute('data-idx'));
+        if (mddTempDestinos[idx]) {
+          const nameInput = row.querySelector('.mdd-dest-name-input');
+          const valInput = row.querySelector('.mdd-regras-input');
+          if (nameInput) mddTempDestinos[idx].nome = nameInput.value.trim() || `Destino ${idx + 1}`;
+          if (valInput) {
+            const v = parseFloat(valInput.value);
+            mddTempDestinos[idx].valor = !isNaN(v) && v >= 0 ? v : 0;
+          }
+        }
+      });
+    }
+
+    function mddAbrirModalRegras() {
+      const modal = document.getElementById('mdd-modal-regras');
+      if (!modal) return;
+      const inTaxa = document.getElementById('mdd-cfg-taxa');
+      if (inTaxa) inTaxa.value = (Number(mddRegras.taxa) || 0).toFixed(2);
+
+      // Clona profundamente os destinos para edição temporária
+      mddTempDestinos = JSON.parse(JSON.stringify(mddRegras.destinos || []));
+      mddRenderModalDestinos();
+
+      const inNovoNome = document.getElementById('mdd-novo-nome');
+      const inNovoVal = document.getElementById('mdd-novo-valor');
+      if (inNovoNome) inNovoNome.value = '';
+      if (inNovoVal) inNovoVal.value = '';
+
+      modal.style.display = 'flex';
+    }
+
+    function mddFecharModalRegras() {
+      const modal = document.getElementById('mdd-modal-regras');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function mddSalvarRegrasModal() {
+      mddSincronizarInputsParaTemp();
+
+      const inTaxa = document.getElementById('mdd-cfg-taxa');
+      const novaTaxa = inTaxa ? parseFloat(inTaxa.value) : mddRegras.taxa;
+
+      mddRegras = {
+        taxa: !isNaN(novaTaxa) && novaTaxa >= 0 ? novaTaxa : 4.5,
+        destinos: mddTempDestinos
+      };
+
+      mddSaveRegras(mddRegras);
+      mddAtualizarResumoTextoRegras();
+      mddRender();
+      mddFecharModalRegras();
+
+      const elMsg = document.getElementById("mdd-msg");
+      if (elMsg) elMsg.textContent = "⚙️ Destinos, nomes e prioridades atualizados com sucesso!";
+    }
+
+    function mddRestaurarRegrasPadrao() {
+      if (confirm('Deseja restaurar as configurações padrão (Taxa: R$ 4,50, Aluguel: R$ 100, Pessoal: R$ 40, Luciano: R$ 100)?')) {
+        mddRegras = JSON.parse(JSON.stringify(MDD_REGRAS_DEF));
+        mddSaveRegras(mddRegras);
+        const inTaxa = document.getElementById('mdd-cfg-taxa');
+        if (inTaxa) inTaxa.value = mddRegras.taxa.toFixed(2);
+        mddTempDestinos = JSON.parse(JSON.stringify(MDD_REGRAS_DEF.destinos));
+        mddRenderModalDestinos();
+        mddAtualizarResumoTextoRegras();
+        mddRender();
+      }
+    }
+
+    function atualizarMetaDiaModulo() {
+      mddState = mddLoad();
+      mddRegras = mddLoadRegras();
+      mddShowPots();
+      mddAtualizarResumoTextoRegras();
+      mddRender();
+      mddRenderHistoricoDias();
+      const metaAtual = (config && config.metaDiaria) ? Number(config.metaDiaria) : MDD_META;
+      const sub = document.getElementById('mdd-meta-sub');
+      if (sub) sub.textContent = `Meta: ${mddBrl(metaAtual)} brutos por dia rodado`;
+    }
+
+    function inicializarMetaDiaEventos() {
+      const inUber = document.getElementById("mdd-uber");
+      const inComb = document.getElementById("mdd-comb");
+      const btnSalvar = document.getElementById("mdd-salvar");
+      const btnZerar = document.getElementById("mdd-zerar");
+
+      if (inUber) inUber.addEventListener("input", mddRender);
+      if (inComb) inComb.addEventListener("input", mddRender);
+      if (btnSalvar) btnSalvar.addEventListener("click", registrarDiaMetaDia);
+
+      ["mdd-pLuc", "mdd-pAlu", "mdd-pRes"].forEach(function(id) {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener("change", function() {
+            mddState.luc = mddNum("mdd-pLuc");
+            mddState.alu = mddNum("mdd-pAlu");
+            mddState.res = mddNum("mdd-pRes");
+            mddSave(mddState);
+            mddShowPots();
+          });
+        }
+      });
+
+      if (btnZerar) {
+        btnZerar.addEventListener("click", function() {
+          if (confirm("Deseja realmente zerar todos os saldos acumulados (Luciano, Aluguel e Reserva)?")) {
+            mddState = { luc: 0, alu: 0, res: 0 };
+            mddSave(mddState);
+            mddShowPots();
+          }
+        });
+      }
+
+      mddShowPots();
+      mddAtualizarResumoTextoRegras();
+      mddRender();
+      mddRenderHistoricoDias();
     }
 
     // --- FUNÇÕES DE GRÁFICOS (CHART.JS) ---
@@ -2546,6 +3788,22 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          onClick: function(event, elements) {
+            if (elements && elements.length > 0) {
+              const idx = elements[0].index;
+              const chave = mesesChave[idx];
+              const label = labelsMeses[idx];
+              const fat = faturamentoPorMes[idx];
+              const gas = gastosPorMes[idx];
+              editarMesRapido(chave, label, fat, gas);
+            }
+          },
+          onHover: function(event, chartElement) {
+            const canvas = event.native ? event.native.target : document.getElementById('chart-evolucao');
+            if (canvas) {
+              canvas.style.cursor = chartElement && chartElement.length ? 'pointer' : 'default';
+            }
+          },
           plugins: {
             legend: { display: false },
             tooltip: {
@@ -2558,6 +3816,9 @@
               callbacks: {
                 label: function(context) {
                   return context.dataset.label + ': ' + formatarMoeda(context.raw);
+                },
+                afterBody: function() {
+                  return '👉 Toque para editar este mês';
                 }
               }
             }
@@ -2719,18 +3980,18 @@
           <div class="editor-mes-card" data-chave="${chave}">
             <div class="editor-mes-header">
               <span>📅 ${label}</span>
-              <span style="color: ${corSobra}; font-family: 'JetBrains Mono', monospace; font-size: 11px;">
+              <span id="badge-sobra-${chave}" style="color: ${corSobra}; font-family: 'JetBrains Mono', monospace; font-size: 11px;">
                 Sobra: ${sobra >= 0 ? '+' : ''}${formatarMoeda(sobra)}
               </span>
             </div>
             <div class="editor-mes-inputs">
               <div>
                 <label>Faturou (R$)</label>
-                <input type="number" step="10" min="0" id="input-fat-${chave}" value="${fat}">
+                <input type="number" step="10" min="0" id="input-fat-${chave}" value="${fat}" oninput="recalcularSobraCardMes('${chave}')">
               </div>
               <div>
                 <label>Gastou (R$)</label>
-                <input type="number" step="10" min="0" id="input-gas-${chave}" value="${gas}">
+                <input type="number" step="10" min="0" id="input-gas-${chave}" value="${gas}" oninput="recalcularSobraCardMes('${chave}')">
               </div>
             </div>
           </div>
@@ -2738,6 +3999,19 @@
       }
 
       listaContainer.innerHTML = html;
+    }
+
+    function recalcularSobraCardMes(chave) {
+      const inputFat = document.getElementById(`input-fat-${chave}`);
+      const inputGas = document.getElementById(`input-gas-${chave}`);
+      const badge = document.getElementById(`badge-sobra-${chave}`);
+      if (!inputFat || !inputGas || !badge) return;
+      const fat = Math.max(0, parseFloat(inputFat.value) || 0);
+      const gas = Math.max(0, parseFloat(inputGas.value) || 0);
+      const sobra = fat - gas;
+      const corSobra = sobra >= 0 ? 'var(--cyan)' : 'var(--coral)';
+      badge.style.color = corSobra;
+      badge.textContent = `Sobra: ${sobra >= 0 ? '+' : ''}${formatarMoeda(sobra)}`;
     }
 
     function salvarTodosMesesEvolucao() {
@@ -2813,7 +4087,7 @@
 
     // --- HTML DE ITEM DA LISTA ---
     function criarLinhaItemHtml(item) {
-      const dataFormatada = item.data ? item.data.split('-').reverse().slice(0, 2).join('/') : '--/--';
+      const dataFormatada = item.data ? formatarDataItem(item.data) : '--/--';
       const sinal = item.tipo === 'in' ? '+' : '-';
       const classeCor = item.tipo === 'in' ? 'in' : 'out';
       const horasBadge = item.horas ? `⏱ ${item.horas}h` : '';
@@ -2843,6 +4117,7 @@
     function renderizarHistorico() {
       const container = document.getElementById('lista-completa');
       const filtro = document.getElementById('filtro-tipo') ? document.getElementById('filtro-tipo').value : 'todos';
+      const termoBusca = (document.getElementById('filtro-busca') ? document.getElementById('filtro-busca').value : '').toLowerCase().trim();
       if (!container) return;
 
       const itensDoMes = lancamentos.filter(item => {
@@ -2850,13 +4125,21 @@
         const [ano, mes] = item.data.split('-').map(Number);
         const bateData = ano === anoAtual && (mes - 1) === mesAtual;
         if (!bateData) return false;
-        if (filtro === 'in') return item.tipo === 'in';
-        if (filtro === 'out') return item.tipo === 'out';
+        if (filtro === 'in' && item.tipo !== 'in') return false;
+        if (filtro === 'out' && item.tipo !== 'out') return false;
+        if (termoBusca) {
+          const desc = (item.desc || '').toLowerCase();
+          const cat = (item.categoria || '').toLowerCase();
+          const val = (item.valor || '').toString();
+          if (!desc.includes(termoBusca) && !cat.includes(termoBusca) && !val.includes(termoBusca)) {
+            return false;
+          }
+        }
         return true;
       });
 
       if (itensDoMes.length === 0) {
-        container.innerHTML = '<div class="empty-state">Nenhum registro para os filtros selecionados.</div>';
+        container.innerHTML = '<div class="empty-state">Nenhum registro encontrado para este filtro ou busca.</div>';
       } else {
         container.innerHTML = itensDoMes.map(item => criarLinhaItemHtml(item)).join('');
       }
@@ -2864,18 +4147,24 @@
 
     // --- CONFIGURAÇÕES ---
     function carregarCamposConfig() {
+      const elSaldoInicial = document.getElementById('cfg-saldo-inicial');
       const elDivida = document.getElementById('cfg-divida-total');
       const elMeta = document.getElementById('cfg-meta-diaria');
       const elAluguel = document.getElementById('cfg-aluguel-valor');
+      if (elSaldoInicial) elSaldoInicial.value = config.saldoInicial !== undefined ? config.saldoInicial : 0;
       if (elDivida) elDivida.value = config.dividaInicial;
       if (elMeta) elMeta.value = config.metaDiaria || 300;
       if (elAluguel) elAluguel.value = config.valorAluguelRapido;
     }
 
     function salvarConfiguracoes() {
+      const elSaldoInicial = document.getElementById('cfg-saldo-inicial');
       const elDivida = document.getElementById('cfg-divida-total');
       const elMeta = document.getElementById('cfg-meta-diaria');
       const elAluguel = document.getElementById('cfg-aluguel-valor');
+      if (elSaldoInicial && !isNaN(parseFloat(elSaldoInicial.value))) {
+        config.saldoInicial = parseFloat(elSaldoInicial.value);
+      }
       if (elDivida && !isNaN(parseFloat(elDivida.value))) {
         config.dividaInicial = parseFloat(elDivida.value);
       }
@@ -2897,7 +4186,7 @@
         localStorage.removeItem('meucontrole_lancamentos');
         localStorage.removeItem('meucontrole_config');
         lancamentos = [];
-        config = { dividaInicial: 7000, valorAluguelRapido: 600, metaDiaria: 300 };
+        config = { saldoInicial: 0, dividaInicial: 7000, valorAluguelRapido: 600, metaDiaria: 300 };
         salvarDados();
         atualizarResumo();
         atualizarMetas();
@@ -3097,6 +4386,7 @@
       atualizarResumo();
       atualizarMetas();
       atualizarGraficos();
+      inicializarMetaDiaEventos();
     });
   </script>
 </body>
