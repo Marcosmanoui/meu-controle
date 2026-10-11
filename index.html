@@ -4828,6 +4828,78 @@
       }
     }
 
+    function aiGerarRespostaLocalInteligente(pergunta, dados) {
+      const msgLower = (pergunta || '').toLowerCase();
+      const meta = Number(dados?.metaDiaria) || 300;
+      const faturouHoje = Number(dados?.faturouHoje) || 0;
+      const pctHoje = Math.round((faturouHoje / (meta || 1)) * 100);
+      const faltaHoje = Math.max(0, meta - faturouHoje);
+      
+      const aluGuardado = Number(dados?.potes?.alu) || 0;
+      const aluMeta = 600;
+      const aluFalta = Math.max(0, aluMeta - aluGuardado);
+      
+      const lucFalta = Number(dados?.potes?.luc) || 0;
+      const resGuardado = Number(dados?.potes?.res) || 0;
+      const dividaRest = Number(dados?.dividaRestante) || 0;
+      const mediaHora = Number(dados?.mediaHora) || 0;
+      const diasRest = Math.max(1, Number(dados?.diasRestantesMes) || 15);
+
+      if (msgLower.includes('aluguel') || msgLower.includes('carro') || msgLower.includes('locaç') || msgLower.includes('locad')) {
+        if (aluFalta <= 0) {
+          return `🎉 **Boa notícia!** Seu aluguel de R$ 600,00 já está totalmente coberto no pote (**${formatarMoeda(aluGuardado)}** guardados).\n\nQualquer excedente nos próximos dias pode ir para amortizar dívidas ou turbinar sua Reserva de Emergência!`;
+        }
+        const diasCalc = Math.min(6, diasRest);
+        const cotaDia = aluFalta / diasCalc;
+        return `🚗 **Aluguel do Carro (Meta: R$ 600,00):**\n\n` +
+          `• Guardado no pote: **${formatarMoeda(aluGuardado)}**\n` +
+          `• Falta completar: **${formatarMoeda(aluFalta)}**\n` +
+          `• Para fechar em ${diasCalc} dias, separe cerca de **${formatarMoeda(cotaDia)} por dia** de rodagem.\n\n` +
+          `💡 **Dica de ouro:** Assim que bater sua meta diária de ${formatarMoeda(meta)}, separe logo a cota de ${formatarMoeda(cotaDia)} antes de contar a sobra!`;
+      }
+
+      if (msgLower.includes('meta') || msgLower.includes('quanto falta') || msgLower.includes('fazer hoje') || msgLower.includes('quanto preciso')) {
+        if (faltaHoje <= 0) {
+          return `🚀 **Meta do dia batida com sucesso!**\n\nVocê faturou **${formatarMoeda(faturouHoje)}**, superando os ${formatarMoeda(meta)} (${pctHoje}% da meta).\n\nSe continuar na pista hoje, guarde todo o excedente no pote de Aluguel ou Reserva de Emergência!`;
+        }
+        const hFalta = mediaHora > 0 ? (faltaHoje / mediaHora).toFixed(1) : '2 a 3';
+        return `🎯 **Progresso da Meta de Hoje (${formatarMoeda(meta)}):**\n\n` +
+          `• Faturado hoje: **${formatarMoeda(faturouHoje)}** (${pctHoje}% concluído)\n` +
+          `• Ainda faltam: **${formatarMoeda(faltaHoje)}**\n` +
+          `• Pela sua média de ${formatarMoeda(mediaHora)}/h, você precisa de aprox. **${hFalta} horas** de rodagem focada.\n\n` +
+          `Foque em corridas curtas em bairros movimentados para economizar combustível!`;
+      }
+
+      if (msgLower.includes('luciano') || msgLower.includes('dívida') || msgLower.includes('divida') || msgLower.includes('nubank') || msgLower.includes('pendên')) {
+        return `💳 **Compromissos & Dívidas:**\n\n` +
+          `• **Pote Luciano:** ${lucFalta > 0 ? `Faltam **${formatarMoeda(lucFalta)}**` : `✅ Quitado/Em dia!`}\n` +
+          `• **Dívida Nubank:** Restam **${formatarMoeda(dividaRest)}**\n\n` +
+          `💡 **Ordem de segurança:** 1º Abastecimento, 2º Aluguel (${formatarMoeda(aluGuardado)} de R$ 600 guardados), 3º Luciano e 4º Nubank!`;
+      }
+
+      if (msgLower.includes('combust') || msgLower.includes('gasolina') || msgLower.includes('etanol') || msgLower.includes('abastec')) {
+        const comb = Number(dados?.combustivelHoje) || 0;
+        return `⛽ **Controle de Combustível:**\n\n` +
+          `• Gasto hoje com combustível: **${formatarMoeda(comb)}**\n` +
+          `• Faturamento bruto hoje: **${formatarMoeda(faturouHoje)}**\n` +
+          `• Tente manter o combustível sempre abaixo de 25% do que você faturou bruto no dia!`;
+      }
+
+      if (msgLower.includes('reserva') || msgLower.includes('emergên') || msgLower.includes('guard')) {
+        return `🛡️ **Reserva de Emergência:**\n\n` +
+          `• Saldo atual guardado: **${formatarMoeda(resGuardado)}**\n` +
+          `• Esse colchão financeiro garante seus dias de descanso ou manutenções sem desespero. Continue guardando as sobras aqui!`;
+      }
+
+      return `📊 **Resumo Financeiro em Tempo Real:**\n\n` +
+        `• **Mês Atual:** Faturou **${formatarMoeda(dados?.faturou || 0)}** | Sobra: **${formatarMoeda(dados?.sobra || 0)}**\n` +
+        `• **Hoje:** Faturou **${formatarMoeda(faturouHoje)}** de **${formatarMoeda(meta)}** (${pctHoje}%)\n` +
+        `• **Pote Aluguel:** **${formatarMoeda(aluGuardado)}** / R$ 600,00 (${aluFalta > 0 ? `faltam ${formatMoeda(aluFalta)}` : 'Garantido 🎉'})\n` +
+        `• **Pote Luciano:** **${formatarMoeda(lucFalta)}**\n` +
+        `• **Reserva Acumulada:** **${formatarMoeda(resGuardado)}**\n\n` +
+        `Como posso te orientar agora? Pergunte sobre aluguel, meta diária, dívidas ou estratégia de rodagem!`;
+    }
+
     async function aiGerarOrientacaoHoje(dados) {
       const elConteudo = document.getElementById('ai-orientacao-conteudo');
       const elHora = document.getElementById('ai-orientacao-hora');
@@ -4838,37 +4910,51 @@
         elConteudo.innerHTML = '<div style="display:flex; align-items:center; gap:8px; color:var(--muted);"><span class="rotate">🔄</span> Analisando seus números e projetando as metas...</div>';
       }
 
+      const faltaHoje = Math.max(0, dados.metaDiaria - dados.faturouHoje);
+      const aluFalta = Math.max(0, 600 - dados.potes.alu);
+      const diasRest = dados.diasRestantesMes || 15;
+      const aluPorDia = (aluFalta / Math.min(6, diasRest)).toFixed(2);
+
+      const htmlFallback = `
+        <strong>🎯 Plano de Ação para Hoje:</strong><br>
+        • <b>Meta diária:</b> ${faltaHoje > 0 ? `Ainda faltam <b>${formatarMoeda(faltaHoje)}</b> para bater a meta de ${formatarMoeda(dados.metaDiaria)} hoje.` : `🎉 <b>Meta de hoje batida!</b> Excedente direto para a reserva.`}<br>
+        • <b>Aluguel do carro:</b> Você já guardou <b>${formatarMoeda(dados.potes.alu)}</b>. ${aluFalta > 0 ? `Faltam <b>${formatarMoeda(aluFalta)}</b> (separe aprox. R$ ${aluPorDia}/dia nos próximos turnos).` : `Aluguel desta semana garantido! 🎉`}<br>
+        • <b>Ordem de parada:</b> 1º Combustível e taxa, 2º Guardar cota do aluguel, 3º Amortizar Luciano/Dívida, e o restante guarde na Reserva!
+      `;
+
       try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 6000);
+
         const resp = await fetch('/api/ai/analisar', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             tipo: 'orientacao_hoje',
             dados: dados
-          })
+          }),
+          signal: controller.signal
         });
+        clearTimeout(timeoutId);
+
+        if (!resp.ok) {
+          throw new Error(`Status ${resp.status}`);
+        }
 
         const data = await resp.json();
-        aiUltimoPromptOrientacao = data.texto;
-
-        if (elConteudo) {
-          elConteudo.innerHTML = formatarTextoMarkdown(data.texto);
+        if (data && data.texto) {
+          aiUltimoPromptOrientacao = data.texto;
+          if (elConteudo) {
+            elConteudo.innerHTML = formatarTextoMarkdown(data.texto);
+          }
+          return;
         }
+        throw new Error('Resposta sem texto');
       } catch (err) {
-        console.error('Erro ao gerar orientação:', err);
-        // Fallback robusto local
-        const faltaHoje = Math.max(0, dados.metaDiaria - dados.faturouHoje);
-        const aluFalta = Math.max(0, 600 - dados.potes.alu);
-        const diasRest = dados.diasRestantesMes || 15;
-        const aluPorDia = (aluFalta / Math.min(7, diasRest)).toFixed(2);
-
+        console.warn('Usando orientação financeira local:', err?.message || err);
+        aiUltimoPromptOrientacao = htmlFallback;
         if (elConteudo) {
-          elConteudo.innerHTML = `
-            <strong>🎯 Plano de Ação para Hoje:</strong><br>
-            • <b>Meta diária:</b> ${faltaHoje > 0 ? `Ainda faltam <b>${formatarMoeda(faltaHoje)}</b> para bater a meta de ${formatarMoeda(dados.metaDiaria)} hoje.` : `🎉 <b>Meta de hoje batida!</b> Excedente direto para a reserva.`}<br>
-            • <b>Aluguel do carro:</b> Você já guardou <b>${formatarMoeda(dados.potes.alu)}</b>. ${aluFalta > 0 ? `Faltam <b>${formatarMoeda(aluFalta)}</b> (separe aprox. R$ ${aluPorDia}/dia nos próximos turnos).` : `Aluguel desta semana garantido! 🎉`}<br>
-            • <b>Ordem de parada:</b> 1º Combustível e taxa, 2º Guardar cota do aluguel, 3º Amortizar Luciano/Dívida, e o restante guarde na Reserva!
-          `;
+          elConteudo.innerHTML = htmlFallback;
         }
       }
     }
@@ -4907,8 +4993,12 @@
         elHistorico.scrollTop = elHistorico.scrollHeight;
       }
 
+      const dados = aiColetarDadosFinanceiros();
+
       try {
-        const dados = aiColetarDadosFinanceiros();
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 7000);
+
         const resp = await fetch('/api/ai/analisar', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -4917,23 +5007,39 @@
             mensagem: pergunta,
             dados: dados,
             historico: aiHistoricoConversa.slice(-6)
-          })
+          }),
+          signal: controller.signal
         });
+        clearTimeout(timeoutId);
 
-        const data = await resp.json();
         const elLoading = document.getElementById(placeholderId);
         if (elLoading) elLoading.remove();
 
-        const respostaTexto = data.texto || 'Desculpe, não consegui calcular essa resposta agora.';
-        aiRenderizarMensagem('assistant', respostaTexto);
+        if (resp.ok) {
+          const data = await resp.json();
+          if (data && data.texto) {
+            aiRenderizarMensagem('assistant', data.texto);
+            aiHistoricoConversa.push({ origem: 'user', texto: pergunta });
+            aiHistoricoConversa.push({ origem: 'assistant', texto: data.texto });
+            return;
+          }
+        }
 
+        // Se o servidor respondeu sem sucesso, gera resposta analítica local instantânea
+        const respostaLocal = aiGerarRespostaLocalInteligente(pergunta, dados);
+        aiRenderizarMensagem('assistant', respostaLocal);
         aiHistoricoConversa.push({ origem: 'user', texto: pergunta });
-        aiHistoricoConversa.push({ origem: 'assistant', texto: respostaTexto });
+        aiHistoricoConversa.push({ origem: 'assistant', texto: respostaLocal });
       } catch (err) {
-        console.error('Erro no chat IA:', err);
+        console.warn('Conexão instável ou offline, gerando resposta local com precisão:', err?.message || err);
         const elLoading = document.getElementById(placeholderId);
         if (elLoading) elLoading.remove();
-        aiRenderizarMensagem('assistant', 'Houve uma falha momentânea de conexão ao consultar a IA. Tente novamente em instantes.');
+
+        // Resposta imediata e inteligente usando os dados reais locais do motorista no celular
+        const respostaLocal = aiGerarRespostaLocalInteligente(pergunta, dados);
+        aiRenderizarMensagem('assistant', respostaLocal);
+        aiHistoricoConversa.push({ origem: 'user', texto: pergunta });
+        aiHistoricoConversa.push({ origem: 'assistant', texto: respostaLocal });
       } finally {
         aiIsLoading = false;
         if (btn) btn.disabled = false;
